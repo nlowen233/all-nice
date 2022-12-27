@@ -1,0 +1,11 @@
+.menu {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+}
+
+.iconGroup {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+}

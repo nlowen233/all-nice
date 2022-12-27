@@ -1,0 +1,14 @@
+.main {
+    width: 320px;
+    height: 100%;
+    transition: 300ms;
+    position: absolute;
+}
+
+.overlay {
+    background-color: black;
+    transition: 300ms;
+    transition-delay: 200ms;
+    pointer-events: none;
+    position: absolute;
+}
