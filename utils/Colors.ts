@@ -4,5 +4,5 @@ export const Colors = {
     mid: '#415a77',
     light: '#778da9',
     lightest: '#e0e1dd',
-    error: '#c41b3b'
+    error: '#c41b3b',
 }

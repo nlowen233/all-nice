@@ -1,4 +1,30 @@
 .main {
     display: grid;
     grid-template-columns: 1fr;
+    justify-items: center;
+    align-items: center;
+}
+
+@media screen and (min-width: 330px) {
+    .main {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media screen and (min-width: 500px) {
+    .main {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+@media screen and (min-width: 720px) {
+    .main {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+@media screen and (min-width: 1080px) {
+    .main {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    }
 }

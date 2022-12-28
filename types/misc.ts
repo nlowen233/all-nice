@@ -8,3 +8,8 @@ export interface APIRes<T> {
     message?: string
     res?: T
 }
+
+export interface CarouselItem {
+    imgURL: string
+    id: string
+}

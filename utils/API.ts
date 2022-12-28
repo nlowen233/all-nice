@@ -1,5 +1,7 @@
-import { ShopifyCollection, ShopifyData } from '../types/api'
+import { ShopifyDataProductHandles } from '../types/api'
+import { ShopifyDataFrontPage } from '../types/frontPageAPI'
 import { APIRes } from '../types/misc'
+import { ShopifyDataSingleProduct } from '../types/singleProductAPI'
 import { Constants } from './Constants'
 
 async function callShopify<Res, Vars = {}>(query: string): Promise<APIRes<Res>> {
@@ -58,19 +60,19 @@ export interface GetFrontPageParams {
 }
 
 export interface GetFrontPageRes {
-    data: ShopifyData
+    data: ShopifyDataFrontPage
 }
 
 const getFrontPage = (p?: GetFrontPageParams) =>
     callShopify<GetFrontPageRes>(`
 {
 	collection(handle:"frontpage") {
-    products(first:${p?.amount||20},sortKey: BEST_SELLING) {
+    products(first:${p?.amount || 20},sortKey: BEST_SELLING) {
     	nodes {
         id,
         description,
         title,
-        onlineStoreUrl,
+        handle,
         priceRange {
           maxVariantPrice {
             amount
@@ -90,6 +92,76 @@ const getFrontPage = (p?: GetFrontPageParams) =>
 }
 `)
 
+export interface GetSingleProductParams {
+    amount?: number
+    handle: string
+}
+
+export interface GetSingleProductRes {
+    data: ShopifyDataSingleProduct
+}
+
+const getSingleProduct = (p: GetSingleProductParams) =>
+    callShopify<GetSingleProductRes>(
+        `
+    {
+        product(handle:"${p.handle}"){
+        handle,
+        id,
+        title,
+        images(first:${p?.amount || 20}){
+          nodes{
+            url
+          }
+        },
+        description,
+        featuredImage{
+          id
+        },
+        options(first:20){
+          id,
+          name,
+          values
+        },
+        totalInventory,
+        variants(first:100) {
+            nodes{
+              availableForSale,
+              quantityAvailable,
+              price{
+                amount
+              }
+              selectedOptions{
+                name,
+                value
+              }
+            }
+          }
+      }
+    }
+    `
+    )
+
+export interface GetProductHandlesRes {
+    data: ShopifyDataProductHandles
+}
+
+const getProductHandles = () =>
+    callShopify<GetProductHandlesRes>(`
+{
+    collection(handle:"frontpage"){
+      products(first:100){
+        nodes{
+          handle
+              }
+      }
+    }
+  }
+  
+`)
+
 export const API = {
     getFrontPage,
+    getSingleProduct,
+    getProductHandles,
 }

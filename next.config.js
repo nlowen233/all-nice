@@ -7,10 +7,10 @@ const nextConfig = {
                 hostname: 'cdn.shopify.com',
                 protocol: 'https',
                 port: '',
-                pathname:'/**'
-            }
-        ]
-    }
+                pathname: '/**',
+            },
+        ],
+    },
 }
 
 module.exports = nextConfig

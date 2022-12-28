@@ -7,7 +7,7 @@ import { Colors } from '../utils/Colors'
 import { ZIndex } from '../types/ZIndex'
 import { Constants } from '../utils/Constants'
 import MUILink from '@mui/material/Link'
-import { useWindowHeight } from '../hooks/useWindowHeight'
+import { useWindowSize } from '../hooks/useWindowSize'
 import { useOnClickOutside } from 'usehooks-ts'
 
 const LINK_CONTAINER_HEIGHT = 600
@@ -20,11 +20,12 @@ type Props = {
 }
 
 export const SideMenuWrapper = ({ links, children, open, closeMenu }: Props) => {
-    const height = useWindowHeight() - Constants.menuBarHeight
+    const [_, height] = useWindowSize()
+    const menuHeight = height - Constants.menuBarHeight
     const menuRef = useRef<HTMLDivElement>()
     useOnClickOutside(menuRef as MutableRefObject<HTMLDivElement>, closeMenu)
     return (
-        <div style={{ width: '100vw', height, position: 'relative' }}>
+        <div style={{ width: '100vw', height: menuHeight, position: 'relative' }}>
             <div
                 className={styles.main}
                 style={{ zIndex: ZIndex.sideMenu, left: !!open ? 0 : -320, backgroundColor: Colors.dark }}
@@ -32,18 +33,21 @@ export const SideMenuWrapper = ({ links, children, open, closeMenu }: Props) => 
             >
                 <div style={{ paddingLeft: 10, height: LINK_CONTAINER_HEIGHT }}>
                     {links.map((link) => (
-                        <div style={{ paddingTop: 5 }}>
-                            <Link href={link.link}>
+                        <div style={{ paddingTop: 5 }} key={link.link}>
+                            <Link href={link.link} onClick={closeMenu}>
                                 <Typography color="secondary">{link.title}</Typography>
                             </Link>
                         </div>
                     ))}
                 </div>
-                <div style={{ backgroundColor: Colors.mid, height: height - LINK_CONTAINER_HEIGHT }}>
+                <div style={{ backgroundColor: Colors.mid, height: menuHeight - LINK_CONTAINER_HEIGHT }}>
                     PROFILE HERE ON LOGIN, SOCIALS HERE ON NOT LOGGED IN
                 </div>
             </div>
-            <div className={styles.overlay} style={{ height: '100%', width: '100%', opacity: !!open ? 0.3 : 0}}/>
+            <div
+                className={styles.overlay}
+                style={{ height: '100%', width: '100%', opacity: !!open ? 0.3 : 0, zIndex: ZIndex.sideMenuOverlay }}
+            />
             {children}
         </div>
     )

@@ -12,6 +12,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import Badge from '@mui/material/Badge'
 import CloseIcon from '@mui/icons-material/Close'
 import { Constants } from '../utils/Constants'
+import Link from 'next/link'
 
 type Props = {
     toggleMenu?: () => void
@@ -34,8 +35,9 @@ export const MenuBar = ({ cartAlerts, toggleCart, toggleMenu, toggleProfile, pro
                 </IconButton>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-                {' '}
-                <Typography color="secondary">The Logo</Typography>{' '}
+                <Link href={'/'}>
+                    <Typography color="secondary">The Logo</Typography>
+                </Link>
             </div>
             <div className={styles.iconGroup}>
                 <IconButton color="secondary" onClick={toggleProfile}>
