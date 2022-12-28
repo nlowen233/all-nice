@@ -1,3 +1,4 @@
+import Shopify from '@shopify/shopify-api'
 import { ShopifyDataProductHandles } from '../types/api'
 import { ShopifyDataFrontPage } from '../types/frontPageAPI'
 import { APIRes } from '../types/misc'
@@ -160,8 +161,75 @@ const getProductHandles = () =>
   
 `)
 
+export interface CreateCustomerParams {
+    email: string
+    password: string
+    firstName: string
+    lastName: string
+    acceptsEmailMarketing?: boolean
+}
+
+export interface CreateCustomerRes {
+    data?: {
+        id?: string | null
+    }
+    errors?: { message?: string }[]
+}
+
+const createCustomer = ({ email, firstName, lastName, password, acceptsEmailMarketing }: CreateCustomerParams) =>
+    callShopify<CreateCustomerRes>(`
+    mutation {
+      customerCreate(input:{email:"${email}",password:"${password}",firstName:"${firstName}",lastName:"${lastName}",acceptsMarketing:${!!acceptsEmailMarketing}}){
+         customer{
+          id,
+        }
+      }
+    }
+`)
+
+export interface LoginParams {
+    email: string
+    password: string
+}
+
+export interface LoginRes {
+    data?: {
+        customerAccessTokenCreate?: {
+            customerAccessToken?: {
+                accessToken?: string
+                expiresAt?: string
+            }
+        }
+        customerUserErrors?: {
+            code?: string
+            field?: string
+            message?: string
+        }[]
+    }
+    errors?: { message?: string }[]
+}
+
+const login = ({ email, password }: LoginParams) =>
+    callShopify<LoginRes>(`
+    mutation {
+      customerAccessTokenCreate(input:{email:"${email}",password:"${password}"}){
+        customerAccessToken{
+          accessToken,
+          expiresAt
+        },
+        customerUserErrors{
+          code,
+          field,
+          message
+        }
+      }
+    }
+`)
+
 export const API = {
     getFrontPage,
     getSingleProduct,
     getProductHandles,
+    createCustomer,
+    login,
 }

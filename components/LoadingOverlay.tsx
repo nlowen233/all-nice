@@ -24,10 +24,10 @@ export const LoadingOverlay = ({ loading }: Props) => {
                     opacity: loading ? 0.6 : 0,
                     pointerEvents: 'none',
                     zIndex: ZIndex.loadingOverlay,
-                    transition: '100ms'
+                    transition: '100ms',
                 }}
             >
-                <ClockLoader size={100} color={Colors.lightest}/>
+                <ClockLoader size={100} color={Colors.lightest} />
             </div>
         </div>
     )

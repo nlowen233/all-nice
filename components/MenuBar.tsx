@@ -13,6 +13,7 @@ import Badge from '@mui/material/Badge'
 import CloseIcon from '@mui/icons-material/Close'
 import { Constants } from '../utils/Constants'
 import Link from 'next/link'
+import { ZIndex } from '../types/ZIndex'
 
 type Props = {
     toggleMenu?: () => void
@@ -25,32 +26,45 @@ type Props = {
 
 export const MenuBar = ({ cartAlerts, toggleCart, toggleMenu, toggleProfile, profileAlerts, menuIsOpen }: Props) => {
     return (
-        <div
-            style={{ position: 'static', backgroundColor: Colors.dark, width: '100vw', height: Constants.menuBarHeight }}
-            className={styles.menu}
-        >
-            <div>
-                <IconButton color="secondary" onClick={toggleMenu}>
-                    {menuIsOpen ? <CloseIcon /> : <MenuIcon />}
-                </IconButton>
+        <>
+            <div
+                style={{
+                    position: 'fixed',
+                    backgroundColor: Colors.dark,
+                    width: '100vw',
+                    height: Constants.menuBarHeight,
+                    zIndex: ZIndex.sideMenu,
+                }}
+                className={styles.menu}
+            >
+                <div>
+                    <IconButton color="secondary" onClick={toggleMenu}>
+                        {menuIsOpen ? <CloseIcon /> : <MenuIcon />}
+                    </IconButton>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <Link href={'/'}>
+                        <Typography color="secondary">The Logo</Typography>
+                    </Link>
+                </div>
+                <div className={styles.iconGroup}>
+                    <Link href={'/profile/home'}>
+                        <IconButton color="secondary" onClick={toggleProfile}>
+                            <Badge badgeContent={profileAlerts} color="error">
+                                <AccountCircleIcon />
+                            </Badge>
+                        </IconButton>
+                    </Link>
+                    <Link href={'/cart'}>
+                        <IconButton color="secondary" onClick={toggleCart}>
+                            <Badge badgeContent={cartAlerts} color="error">
+                                <ShoppingCartIcon />
+                            </Badge>
+                        </IconButton>
+                    </Link>
+                </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <Link href={'/'}>
-                    <Typography color="secondary">The Logo</Typography>
-                </Link>
-            </div>
-            <div className={styles.iconGroup}>
-                <IconButton color="secondary" onClick={toggleProfile}>
-                    <Badge badgeContent={profileAlerts} color="error">
-                        <AccountCircleIcon />
-                    </Badge>
-                </IconButton>
-                <IconButton color="secondary" onClick={toggleCart}>
-                    <Badge badgeContent={cartAlerts} color="error">
-                        <ShoppingCartIcon />
-                    </Badge>
-                </IconButton>
-            </div>
-        </div>
+            <div style={{ height: Constants.menuBarHeight }} />
+        </>
     )
 }
