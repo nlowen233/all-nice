@@ -14,6 +14,7 @@ import { Validate } from '../../utils/Validate'
 import { Checkbox, FormControlLabel, FormGroup } from '@mui/material'
 import { AuthContext } from '../../contexts/AuthContext'
 import { useRouter } from 'next/router'
+import { Utils } from '../../utils/Utils'
 
 interface Validations {
     first: boolean
@@ -122,6 +123,7 @@ export default function Login() {
             } else if (!!loginRes.res?.data?.customerAccessTokenCreate?.customerAccessToken?.accessToken) {
                 const tokenRes = loginRes.res?.data?.customerAccessTokenCreate.customerAccessToken
                 setAuth({ expiresAt: tokenRes.expiresAt, token: tokenRes.accessToken })
+                Utils.storeToken(tokenRes.accessToken, tokenRes.expiresAt)
                 router.push(returnToRoute || '/')
             } else {
                 pushBannerMessage({

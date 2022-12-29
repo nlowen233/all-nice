@@ -1,6 +1,6 @@
 import Head from 'next/head'
 
-export default function Orders() {
+export default function Address() {
     return (
         <>
             <Head>
@@ -9,7 +9,7 @@ export default function Orders() {
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <p>Orders</p>
+            <p>Address</p>
         </>
     )
 }

@@ -7,7 +7,3 @@
 .cardImg:hover {
     transform: scale(1.03);
 }
-
-.card:hover {
-    color: aquamarine;
-}

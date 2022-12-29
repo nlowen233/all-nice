@@ -33,8 +33,14 @@ export const SideMenuWrapper = ({ links, children, open, closeMenu }: Props) => 
             >
                 <div style={{ paddingLeft: 10, height: LINK_CONTAINER_HEIGHT }}>
                     {links.map((link) => (
-                        <div style={{ paddingTop: 5 }} key={link.link}>
-                            <Link href={link.link} onClick={closeMenu}>
+                        <div style={{ paddingTop: 5 }} key={link.title}>
+                            <Link
+                                href={link.link}
+                                onClick={() => {
+                                    link.onClick && link.onClick()
+                                    closeMenu()
+                                }}
+                            >
                                 <Typography color="secondary">{link.title}</Typography>
                             </Link>
                         </div>

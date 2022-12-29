@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import AppBar from '@mui/material/AppBar'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
@@ -14,6 +14,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { Constants } from '../utils/Constants'
 import Link from 'next/link'
 import { ZIndex } from '../types/ZIndex'
+import { AuthContext } from '../contexts/AuthContext'
 
 type Props = {
     toggleMenu?: () => void
@@ -25,6 +26,7 @@ type Props = {
 }
 
 export const MenuBar = ({ cartAlerts, toggleCart, toggleMenu, toggleProfile, profileAlerts, menuIsOpen }: Props) => {
+    const { token } = useContext(AuthContext)
     return (
         <>
             <div
@@ -48,7 +50,7 @@ export const MenuBar = ({ cartAlerts, toggleCart, toggleMenu, toggleProfile, pro
                     </Link>
                 </div>
                 <div className={styles.iconGroup}>
-                    <Link href={'/profile/home'}>
+                    <Link href={!!token ? `/profile` : '/profile/login'}>
                         <IconButton color="secondary" onClick={toggleProfile}>
                             <Badge badgeContent={profileAlerts} color="error">
                                 <AccountCircleIcon />

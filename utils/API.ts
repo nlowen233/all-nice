@@ -226,10 +226,122 @@ const login = ({ email, password }: LoginParams) =>
     }
 `)
 
+export interface GetProfileParams {
+    customerAccessToken: string
+}
+
+export interface GetProfileRes {
+    errors?: { message?: string }[]
+    data?: {
+        customer?: {
+            acceptsMarketing?: boolean | null
+            createdAt?: string | null
+            defaultAddress?: {
+              address1?: string | null
+              address2?: string | null
+              city?: string | null
+              company?: string | null
+              firstName?: string | null
+              lastName?: string | null
+              id?: string | null
+              phone?: string | null
+              zip?: string | null
+              provinceCode?: string | null
+            }
+            email?: string | null
+            firstName?: string | null
+            lastName?: string | null
+            phone?: string | null
+            lastIncompleteCheckout?: {
+                id?: string | null
+            }
+            orders?: {
+                nodes: ShopifyOrder[]
+            }
+        }
+    }
+}
+
+export interface ShopifyOrder {
+    fufillmentStatus?: string | null
+    cancelReason?: string | null
+    canceledAt?: string | null
+    shippingAddress?: {
+        id?: string | null
+    }
+    orderNumber?: number | null
+    totalPrice?: {
+        amount?: string | null
+    }
+    totalShippingPrice?: {
+        amount?: string | null
+    }
+    totalTax?: {
+        amount?: string | null
+    }
+    processedAt?: string | null
+}
+
+const getProfile = ({ customerAccessToken }: GetProfileParams) =>
+    callShopify<GetProfileRes>(
+        `
+  {
+    customer(customerAccessToken:"${customerAccessToken}"){
+      acceptsMarketing,
+      createdAt,
+      defaultAddress {
+        address1,
+          address2,
+          city,
+          company,
+          firstName,
+          lastName,
+          id,
+          phone,
+          zip,
+          provinceCode
+      },
+      email,
+      firstName,
+      lastName,
+      phone,
+      lastIncompleteCheckout{
+          id
+      },
+      orders(first:250){
+        nodes{
+          fulfillmentStatus,
+          cancelReason,
+          canceledAt,
+          shippingAddress{
+            id
+          },
+          currentTotalTax{
+            amount
+          },
+          orderNumber,
+          totalPrice{
+            amount
+          },
+          totalShippingPrice{
+            amount
+          },
+          totalTax{
+            amount
+          },
+          processedAt
+        }
+      }
+    }
+  }  
+  `
+    )
+
 export const API = {
     getFrontPage,
     getSingleProduct,
     getProductHandles,
     createCustomer,
     login,
+    getProfile,
 }

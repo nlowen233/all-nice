@@ -33,7 +33,7 @@ export const MessageBanner = ({ bannerMessage, close }: Props) => {
                 height: 40,
                 opacity: !!bannerMessage ? 1 : 0,
                 transition: '400ms',
-                pointerEvents: !!bannerMessage ? undefined : 'none'
+                pointerEvents: !!bannerMessage ? undefined : 'none',
             }}
         >
             <div

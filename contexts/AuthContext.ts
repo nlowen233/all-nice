@@ -1,4 +1,4 @@
-import React from 'react'
+import React,{Dispatch} from 'react'
 
 export interface AuthContextVars {
     token: string | undefined
@@ -7,12 +7,14 @@ export interface AuthContextVars {
 }
 
 export interface AuthContextShape extends AuthContextVars {
-    setAuth: (auth: Partial<AuthContextVars>) => void
+    setAuth: Dispatch<React.SetStateAction<Partial<AuthContextVars>>>
+    checkedLocalStorage: boolean
 }
 
 export const AuthContext = React.createContext<AuthContextShape>({
     token: undefined,
     expiresAt: undefined,
-    setAuth: () => {},
+    setAuth: () => ({}),
     returnToRoute: undefined,
+    checkedLocalStorage: false,
 })

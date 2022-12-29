@@ -1,13 +1,9 @@
-.cardImg {
+.card {
     box-shadow: 4px 9px 22px -6px rgba(0, 0, 0, 0.55);
     -webkit-box-shadow: 4px 9px 22px -6px rgba(0, 0, 0, 0.55);
     -moz-box-shadow: 4px 9px 22px -6px rgba(0, 0, 0, 0.55);
     transition: 300ms;
 }
-.cardImg:hover {
-    transform: scale(1.03);
-}
-
 .card:hover {
-    color: aquamarine;
+    transform: scale(1.03);
 }

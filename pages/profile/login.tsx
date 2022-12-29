@@ -1,4 +1,4 @@
-import React, { useState, useCallback,useContext,useEffect } from 'react'
+import React, { useState, useCallback, useContext, useEffect } from 'react'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
@@ -12,15 +12,15 @@ import { API } from '../../utils/API'
 import { MessageBannerContext } from '../../contexts/MessageBannerContext'
 import { AuthContext } from '../../contexts/AuthContext'
 import { LoadingOverlayContext } from '../../contexts/LoadingOverlayContext'
-import dayjs from 'dayjs'
+import { Utils } from '../../utils/Utils'
 
 export default function Login() {
     const [email, setEmail] = useState('')
     const [pass, setPass] = useState('')
     const router = useRouter()
-    const {toggle} = useContext(LoadingOverlayContext)
-    const {pushBannerMessage} = useContext(MessageBannerContext)
-    const {setAuth,returnToRoute,token,expiresAt} = useContext(AuthContext)
+    const { toggle } = useContext(LoadingOverlayContext)
+    const { pushBannerMessage } = useContext(MessageBannerContext)
+    const { setAuth, returnToRoute, token, expiresAt } = useContext(AuthContext)
     const login = useCallback(async () => {
         toggle(true)
         const loginRes = await API.login({ email, password: pass })
@@ -36,23 +36,24 @@ export default function Login() {
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-        } else if(!!loginRes.res?.data?.customerUserErrors?.length) {
+        } else if (!!loginRes.res?.data?.customerUserErrors?.length) {
             const userError = loginRes.res?.data?.customerUserErrors[0]
             pushBannerMessage({
-                title: userError.message||'Looks like you may have entered incorrect info',
+                title: userError.message || 'Looks like you may have entered incorrect info',
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-        }else if (!!loginRes.res?.data?.customerAccessTokenCreate?.customerAccessToken?.accessToken) {
+        } else if (!!loginRes.res?.data?.customerAccessTokenCreate?.customerAccessToken?.accessToken) {
             pushBannerMessage({
                 title: `Success!! (You're in baby)`,
                 styling: { backgroundColor: Colors.success },
-                autoClose: Constants.stdAutoCloseInterval,
+                autoClose: 3000,
             })
             const tokenRes = loginRes.res?.data?.customerAccessTokenCreate.customerAccessToken
             setAuth({ expiresAt: tokenRes.expiresAt, token: tokenRes.accessToken })
+            Utils.storeToken(tokenRes.accessToken, tokenRes.expiresAt)
             router.push(returnToRoute || '/')
-        } else{
+        } else {
             pushBannerMessage({
                 title: `Unknown Login error occured...`,
                 styling: { backgroundColor: Colors.error },
@@ -60,13 +61,13 @@ export default function Login() {
             })
         }
         toggle(false)
-    }, [email,pass,pushBannerMessage,setAuth,router])
+    }, [email, pass, pushBannerMessage, setAuth, router])
 
-    useEffect(()=>{
-        if(!!token&&dayjs(expiresAt).isBefore(dayjs())){
-            router.push('/profile/home')
+    useEffect(() => {
+        if (!!token) {
+            router.push('/profile')
         }
-    },[])
+    }, [])
 
     return (
         <>
