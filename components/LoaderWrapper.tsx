@@ -7,8 +7,6 @@ type Props = {
     children?: React.ReactNode
 }
 
-export const LoaderWrapper = ({loadState,children}:Props) => {
-  return (
-    loadState==='loading'||loadState==='init' ? <ClockLoader/> : <>{children}</>
-  )
+export const LoaderWrapper = ({ loadState, children }: Props) => {
+    return loadState === 'loading' || loadState === 'init' ? <ClockLoader /> : <>{children}</>
 }

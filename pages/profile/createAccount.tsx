@@ -30,7 +30,7 @@ const INIT_VALIDS = (): Validations => ({
     password: true,
 })
 
-export default function Login() {
+export default function CreateAccount() {
     const [first, setFirst] = useState('')
     const [last, setLast] = useState('')
     const [email, setEmail] = useState('')

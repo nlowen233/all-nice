@@ -3,46 +3,46 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Head from 'next/head'
-import { useWindowSize } from '../../hooks/useWindowSize'
-import { Colors } from '../../utils/Colors'
-import { Constants } from '../../utils/Constants'
-import Link from 'next/link'
-import { LoadingOverlayContext } from '../../contexts/LoadingOverlayContext'
-import { API } from '../../utils/API'
-import { MessageBannerContext } from '../../contexts/MessageBannerContext'
-import { Validate } from '../../utils/Validate'
-import { Checkbox, FormControlLabel, FormGroup } from '@mui/material'
-import { AuthContext } from '../../contexts/AuthContext'
+import { LoadingOverlayContext } from '../../../../contexts/LoadingOverlayContext'
+import { MessageBannerContext } from '../../../../contexts/MessageBannerContext'
+import { AuthContext } from '../../../../contexts/AuthContext'
 import { useRouter } from 'next/router'
-import { Utils } from '../../utils/Utils'
+import { Colors } from '../../../../utils/Colors'
+import { Constants } from '../../../../utils/Constants'
+import { API } from '../../../../utils/API'
+import { Utils } from '../../../../utils/Utils'
 
 
-export default function CreateAccount() {
-    const [email, setEmail] = useState('')
-    const [emailInvalid,setEmailInvalid] = useState(false)
+export default function Reset() {
+    const [password,setPassword] = useState('')
+    const [passInvalid,setPassInvalid] = useState(false)
     const { on, toggle } = useContext(LoadingOverlayContext)
     const { pushBannerMessage } = useContext(MessageBannerContext)
     const { setAuth, returnToRoute } = useContext(AuthContext)
     const router = useRouter()
 
     const recover = useCallback(async () => {
-        if(!email){
-            setEmailInvalid(true)
+        const id = `gid://shopify/Customer/${router.query.user}`
+        if(!password){
+            setPassInvalid(true)
             return pushBannerMessage({
-                title: 'Looks like your email might be invalid',
+                title: 'Looks like your password might be invalid',
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
         }
         toggle(true)
-        const res = await API.recoverAccount({
-            email,
+        const res = await API.resetPassword({
+            id,
+            password,
+            resetToken: router.query.resetToken as string
         })
         const errors = res.res?.errors||[]
-        const userErrors = res.res?.data?.customerRecover?.customerUserErrors||[]
+        const userErrors = res.res?.data?.customerReset?.customerUserErrors||[]
+        const tokenRes = res.res?.data?.customerReset?.customerAccessToken
         if (res.err) {
             pushBannerMessage({
-                title: res.message || 'Unknown error occured, could not send recovery email',
+                title: res.message || 'Unknown error occured, could not reset password',
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
@@ -58,13 +58,24 @@ export default function CreateAccount() {
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
+        } else if(tokenRes?.accessToken){
+            pushBannerMessage({
+                title: 'Successfully reset password',
+                styling: { backgroundColor: Colors.success },
+                autoClose: Constants.stdAutoCloseInterval,
+            })
+            setAuth({token:tokenRes.accessToken,expiresAt:tokenRes.expiresAt})
+            Utils.storeToken(tokenRes.accessToken,tokenRes.expiresAt)
+            router.push('/')
         } else{
             pushBannerMessage({
-                title: 'Check your email for the reset link',
+                title: 'Unknown Error',
+                styling: { backgroundColor: Colors.error },
+                autoClose: Constants.stdAutoCloseInterval,
             })
         }
         toggle(false)
-    }, [email,toggle, pushBannerMessage, setAuth, router,emailInvalid])
+    }, [toggle, pushBannerMessage, setAuth, router,password,passInvalid])
 
     return (
         <>
@@ -84,42 +95,25 @@ export default function CreateAccount() {
                 }}
             >
                 <Typography variant="h2" fontSize={'1.8em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
-                    Recover Your Account
+                    Reset Password
                 </Typography>
                 <TextField
                     id="outlined-basic"
-                    label="Email"
+                    label="New Password"
                     variant="outlined"
-                    placeholder="allniceclothing@gmail.com"
+                    placeholder="*******"
                     style={{ marginTop: 20 }}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="email"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
                     required
-                    error={emailInvalid}
-                    onFocus={() => setEmailInvalid(false)}
+                    type="password"
+                    error={passInvalid}
+                    onFocus={() => setPassInvalid(false)}
                 />
                 <Button variant="contained" style={{ marginTop: 40 }} onClick={recover}>
-                    Send Recovery Email
+                    Reset Password
                 </Button>
-                <Link href={'/profile/login'}>
-                    <Typography
-                        variant="subtitle1"
-                        fontSize={'.8em'}
-                        style={{ color: Colors.light, fontWeight: 'bold', textDecoration: 'underline', marginTop: 10 }}
-                    >
-                        Take me back to login
-                    </Typography>
-                </Link>
-                <Link href={'/profile/createAccount'}>
-                    <Typography
-                        variant="subtitle1"
-                        fontSize={'.8em'}
-                        style={{ color: Colors.light, fontWeight: 'bold', textDecoration: 'underline', marginTop: 10 }}
-                    >
-                        or create an account
-                    </Typography>
-                </Link>
             </div>
         </>
     )

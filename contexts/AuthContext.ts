@@ -1,4 +1,4 @@
-import React,{Dispatch} from 'react'
+import React, { Dispatch } from 'react'
 
 export interface AuthContextVars {
     token: string | undefined

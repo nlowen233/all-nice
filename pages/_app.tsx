@@ -19,7 +19,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const [menu, setMenu] = useState(false)
     const [loadingOverlay, setLoadingOverlay] = useState(false)
     const [bannerMessageStack, setBannerMessageStack] = useState<BannerMessage[]>([])
-    const currentMessage = !!bannerMessageStack.length ? bannerMessageStack[0] : undefined
+    const currentMessage = !!bannerMessageStack.length ? bannerMessageStack[bannerMessageStack.length-1] : undefined
     const router = useRouter()
     const pushBannerMessage = (msg: BannerMessage) => setBannerMessageStack((stack) => [...stack, msg])
     const popBannerMessage = () => setBannerMessageStack((stack) => [...stack.slice(1)])

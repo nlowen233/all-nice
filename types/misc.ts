@@ -15,4 +15,5 @@ export interface CarouselItem {
     id: string
 }
 
-export type LoadState = 'init'|'loading'|'success'|'failure'
+export type LoadState = 'init' | 'loading' | 'success' | 'failure'
+export type Primitive = number | string | boolean | null | undefined

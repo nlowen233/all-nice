@@ -24,6 +24,7 @@ export default function Login() {
     const login = useCallback(async () => {
         toggle(true)
         const loginRes = await API.login({ email, password: pass })
+        const userErrors = loginRes.res?.data?.customerAccessTokenCreate?.customerUserErrors||[]
         if (loginRes.err) {
             pushBannerMessage({
                 title: loginRes.message || 'Failed to login',
@@ -36,8 +37,8 @@ export default function Login() {
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-        } else if (!!loginRes.res?.data?.customerUserErrors?.length) {
-            const userError = loginRes.res?.data?.customerUserErrors[0]
+        } else if (!!userErrors.length) {
+            const userError = userErrors[0]
             pushBannerMessage({
                 title: userError.message || 'Looks like you may have entered incorrect info',
                 styling: { backgroundColor: Colors.error },
@@ -45,7 +46,7 @@ export default function Login() {
             })
         } else if (!!loginRes.res?.data?.customerAccessTokenCreate?.customerAccessToken?.accessToken) {
             pushBannerMessage({
-                title: `Success!! (You're in baby)`,
+                title: `Successfully logged in`,
                 styling: { backgroundColor: Colors.success },
                 autoClose: 3000,
             })
@@ -54,6 +55,7 @@ export default function Login() {
             Utils.storeToken(tokenRes.accessToken, tokenRes.expiresAt)
             router.push(returnToRoute || '/')
         } else {
+            console.log(loginRes)
             pushBannerMessage({
                 title: `Unknown Login error occured...`,
                 styling: { backgroundColor: Colors.error },

@@ -15,21 +15,32 @@ import { LoaderWrapper } from '../../components/LoaderWrapper'
 import { Utils } from '../../utils/Utils'
 import Link from 'next/link'
 import styles from '../../styles/pages/Profile.module.css'
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@mui/icons-material/Edit'
 import IconButton from '@mui/material/IconButton'
+import { AddressCard } from '../../components/AddressCard'
+import AddIcon from '@mui/icons-material/Add';
 
 export default function You() {
-    const { token, checkedLocalStorage,setAuth } = useContext(AuthContext)
+    const { token, checkedLocalStorage, setAuth } = useContext(AuthContext)
     const { toggle } = useContext(LoadingOverlayContext)
     const { pushBannerMessage } = useContext(MessageBannerContext)
     const [profile, setProfile] = useState<GetProfileRes>({})
+    const [editingAddressID,setEditingAddressID] = useState<undefined|string>(undefined)
+    const [addressPopUp,setAddressPopUp] = useState(false)
     const router = useRouter()
     const [passedAuth, setPassedAuth] = useState<undefined | boolean>(undefined)
     const [loadState, setLoadState] = useState<LoadState>('init')
-    const orders = profile.data?.customer?.orders?.nodes || []
-    const address = profile.data?.customer?.defaultAddress
+    const customer = profile.data?.customer
+    const orders = customer?.orders?.nodes || []
+    const addresses = customer?.addresses?.nodes||[]
+    const defaultAddressID = customer?.defaultAddress?.id
+    const sortedAddresses = [...addresses].sort((a,b)=>{
+        if(a.id===defaultAddressID){return -1}
+        if(b.id===defaultAddressID){return 1}
+        return 0
+    })
     const logOut = () => {
-        setAuth(a=>({...a,expiresAt:undefined,token:undefined}))
+        setAuth((a) => ({ ...a, expiresAt: undefined, token: undefined }))
         Utils.clearToken()
         router.push('/')
     }
@@ -90,72 +101,75 @@ export default function You() {
                     </Typography>
                     <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', minHeight: 200 }}>
                         <LoaderWrapper loadState={loadState}>
-                            {!!orders.length ? orders.map((order) => (
-                                <OrderCard order={order} key={order.orderNumber} />
-                            ))
-                                :
+                            {!!orders.length ? (
+                                orders.map((order) => <OrderCard order={order} key={order.orderNumber} />)
+                            ) : (
                                 <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
                                     You haven't ordered anything :{`(`}
                                 </Typography>
-                            }
+                            )}
                         </LoaderWrapper>
                     </div>
-                    <div style={{display:'flex',alignItems:'center'}}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Typography
                             variant="h4"
                             fontSize={'1.2em'}
-                            style={{ color: Colors.dark, fontWeight: 'bold', paddingTop: 5, paddingBottom: 5,paddingRight:5 }}
+                            style={{ color: Colors.dark, fontWeight: 'bold', paddingTop: 5, paddingRight: 5 }}
                         >
                             Account Details
                         </Typography>
                         <Link href={'/profile/details'}>
-                        <IconButton>
-                            <EditIcon/>
-                        </IconButton>
+                            <IconButton>
+                                <EditIcon />
+                            </IconButton>
                         </Link>
                     </div>
                     <div style={{ paddingLeft: 10 }}>
-                        <Typography
-                            variant="subtitle1"
-                            fontSize={'1em'}
-                            style={{ color: Colors.light }}
-                        >
+                        <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light }}>
                             {profile.data?.customer?.firstName} {profile.data?.customer?.lastName}
                         </Typography>
-                        <Typography
-                            variant="subtitle1"
-                            fontSize={'1em'}
-                            style={{ color: Colors.light }}
-                        >
-                            {address?.address1}
+                        <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light }}>
+                            {profile.data?.customer?.email}
                         </Typography>
-                        <Typography
-                            variant="subtitle1"
-                            fontSize={'1em'}
-                            style={{ color: Colors.light }}
-                        >
-                            {Utils.displayAddress({ city: address?.city, stateCode: address?.provinceCode, zip: address?.zip })}
+                        <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light }}>
+                            {profile.data?.customer?.phone}
                         </Typography>
                     </div>
-                    <div style={{paddingTop:20}}/>
-                    <Link href={'/profile/address'} className={styles.link}>
-                            <Typography
-                                variant="subtitle1"
-                                fontSize={'1em'}
-                                style={{ color: Colors.mid,textDecorationColor:Colors.mid }}
-                            >
-                                View all addresses
-                            </Typography>
-                        </Link>
+                    <div style={{ paddingTop: 20 }} />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Typography
-                            variant="subtitle1"
-                            fontSize={'1em'}
-                            style={{ color: Colors.mid,textDecorationColor:Colors.mid }}
-                            className={styles.link}
-                            onClick={logOut}
+                            variant="h4"
+                            fontSize={'1.2em'}
+                            style={{ color: Colors.dark, fontWeight: 'bold', paddingTop: 5, paddingBottom: 5}}
                         >
-                            Log out
+                            Addresses
                         </Typography>
+                        <Link href={'/profile/details'}>
+                            <IconButton>
+                                <AddIcon/>
+                            </IconButton>
+                        </Link>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', minHeight: 200 }}>
+                        <LoaderWrapper loadState={loadState}>
+                            {!!orders.length ? (
+                                sortedAddresses.map((add) => <AddressCard address={add} key={add.id} isDefault={add.id===defaultAddressID}/>)
+                            ) : (
+                                <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
+                                    You don't have any known addresses
+                                </Typography>
+                            )}
+                        </LoaderWrapper>
+                    </div>
+                    <Typography
+                        variant="subtitle1"
+                        fontSize={'1em'}
+                        style={{ color: Colors.mid, textDecorationColor: Colors.mid }}
+                        className={styles.link}
+                        onClick={logOut}
+                    >
+                        Log out
+                    </Typography>
                 </div>
             </div>
         </>
