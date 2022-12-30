@@ -16,17 +16,16 @@ import { AuthContext } from '../../contexts/AuthContext'
 import { useRouter } from 'next/router'
 import { Utils } from '../../utils/Utils'
 
-
 export default function CreateAccount() {
     const [email, setEmail] = useState('')
-    const [emailInvalid,setEmailInvalid] = useState(false)
+    const [emailInvalid, setEmailInvalid] = useState(false)
     const { on, toggle } = useContext(LoadingOverlayContext)
     const { pushBannerMessage } = useContext(MessageBannerContext)
     const { setAuth, returnToRoute } = useContext(AuthContext)
     const router = useRouter()
 
     const recover = useCallback(async () => {
-        if(!email){
+        if (!email) {
             setEmailInvalid(true)
             return pushBannerMessage({
                 title: 'Looks like your email might be invalid',
@@ -38,8 +37,8 @@ export default function CreateAccount() {
         const res = await API.recoverAccount({
             email,
         })
-        const errors = res.res?.errors||[]
-        const userErrors = res.res?.data?.customerRecover?.customerUserErrors||[]
+        const errors = res.res?.errors || []
+        const userErrors = res.res?.data?.customerRecover?.customerUserErrors || []
         if (res.err) {
             pushBannerMessage({
                 title: res.message || 'Unknown error occured, could not send recovery email',
@@ -52,19 +51,19 @@ export default function CreateAccount() {
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-        }  else if (userErrors.length) {
+        } else if (userErrors.length) {
             pushBannerMessage({
                 title: userErrors[0].message || 'Unknown Error',
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-        } else{
+        } else {
             pushBannerMessage({
                 title: 'Check your email for the reset link',
             })
         }
         toggle(false)
-    }, [email,toggle, pushBannerMessage, setAuth, router,emailInvalid])
+    }, [email, toggle, pushBannerMessage, setAuth, router, emailInvalid])
 
     return (
         <>

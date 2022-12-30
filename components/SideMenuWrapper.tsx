@@ -25,7 +25,7 @@ export const SideMenuWrapper = ({ links, children, open, closeMenu }: Props) => 
     const menuRef = useRef<HTMLDivElement>()
     useOnClickOutside(menuRef as MutableRefObject<HTMLDivElement>, closeMenu)
     return (
-        <div style={{ width: '100vw', height: menuHeight, position: 'relative' }}>
+        <div style={{ width: '100%', height: menuHeight }}>
             <div
                 className={styles.main}
                 style={{ zIndex: ZIndex.sideMenu, left: !!open ? 0 : -320, backgroundColor: Colors.dark }}

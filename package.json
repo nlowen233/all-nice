@@ -15,6 +15,7 @@
         "@mui/icons-material": "^5.11.0",
         "@mui/material": "^5.11.1",
         "@next/font": "13.1.1",
+        "@react-spring/web": "^9.6.1",
         "@shopify/shopify-api": "^6.0.2",
         "@types/node": "18.11.17",
         "@types/react": "18.0.26",

@@ -24,7 +24,7 @@ export default function Login() {
     const login = useCallback(async () => {
         toggle(true)
         const loginRes = await API.login({ email, password: pass })
-        const userErrors = loginRes.res?.data?.customerAccessTokenCreate?.customerUserErrors||[]
+        const userErrors = loginRes.res?.data?.customerAccessTokenCreate?.customerUserErrors || []
         if (loginRes.err) {
             pushBannerMessage({
                 title: loginRes.message || 'Failed to login',
@@ -55,7 +55,6 @@ export default function Login() {
             Utils.storeToken(tokenRes.accessToken, tokenRes.expiresAt)
             router.push(returnToRoute || '/')
         } else {
-            console.log(loginRes)
             pushBannerMessage({
                 title: `Unknown Login error occured...`,
                 styling: { backgroundColor: Colors.error },

@@ -44,7 +44,7 @@ export default function AccountDetails() {
     const [validations, setValidations] = useState<Validations>(INIT_VALIDS())
     const { on, toggle } = useContext(LoadingOverlayContext)
     const { pushBannerMessage } = useContext(MessageBannerContext)
-    const { token,setAuth} = useContext(AuthContext)
+    const { token, setAuth } = useContext(AuthContext)
     const router = useRouter()
 
     const update = useCallback(async () => {
@@ -89,7 +89,14 @@ export default function AccountDetails() {
         toggle(true)
         const attemptedPasswordChange = !!pass
         const res = await API.updateCustomer({
-            customer: { acceptsMarketing: emailMarketing, email, firstName: first, lastName: last, password: pass, phone:Utils.standardizePhone(phone) },
+            customer: {
+                acceptsMarketing: emailMarketing,
+                email,
+                firstName: first,
+                lastName: last,
+                password: pass,
+                phone: Utils.standardizePhone(phone),
+            },
             customerAccessToken: token as string,
         })
         let newRoute = '/profile'
@@ -125,7 +132,7 @@ export default function AccountDetails() {
                 if (newTokenRes) {
                     setAuth({ expiresAt: newTokenRes.expiresAt, token: newTokenRes.accessToken })
                     Utils.storeToken(newTokenRes.accessToken, newTokenRes.expiresAt)
-                }else  {
+                } else {
                     newRoute = '/profile/login'
                     pushBannerMessage({
                         title: 'Please log in with your new password',
@@ -136,7 +143,7 @@ export default function AccountDetails() {
             router.push(newRoute)
         }
         toggle(false)
-    }, [setValidations, first, last, email, pass, toggle, pushBannerMessage, emailMarketing, phone, router,pass2])
+    }, [setValidations, first, last, email, pass, toggle, pushBannerMessage, emailMarketing, phone, router, pass2])
 
     useEffect(() => {
         if (!token) {
@@ -268,7 +275,7 @@ export default function AccountDetails() {
                 />
                 <FormGroup>
                     <FormControlLabel
-                        control={<Checkbox value={emailMarketing} onClick={() => toggleEmailMarketing((b) => !b)} />}
+                        control={<Checkbox checked={emailMarketing} onClick={() => toggleEmailMarketing((b) => !b)} />}
                         label={emailMarketing ? 'Turn off email marketing?' : 'Turn on email marketing?'}
                     />
                 </FormGroup>

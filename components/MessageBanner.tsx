@@ -30,7 +30,7 @@ export const MessageBanner = ({ bannerMessage, close }: Props) => {
                 width: '100%',
                 zIndex: ZIndex.messageBanner,
                 top: Constants.menuBarHeight,
-                height: 40,
+                minHeight: 40,
                 opacity: !!bannerMessage ? 1 : 0,
                 transition: '400ms',
                 pointerEvents: !!bannerMessage ? undefined : 'none',
@@ -44,12 +44,13 @@ export const MessageBanner = ({ bannerMessage, close }: Props) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100%',
+                    padding:10
                 }}
             >
                 <Typography variant="h2" fontSize={'1em'} style={{ color: bannerMessage?.styling?.fontColor || Colors.lightest }}>
                     {bannerMessage?.title}
                 </Typography>
-                <div style={{ position: 'absolute', top: 0, right: 0 }}>
+                <div style={{ position: 'absolute', top: 0, right: 20 }}>
                     <IconButton color="primary" onClick={close} sx={{ color: Colors.lightest }}>
                         <CloseIcon />
                     </IconButton>

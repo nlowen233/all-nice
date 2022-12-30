@@ -12,10 +12,9 @@ import { Constants } from '../../../../utils/Constants'
 import { API } from '../../../../utils/API'
 import { Utils } from '../../../../utils/Utils'
 
-
 export default function Reset() {
-    const [password,setPassword] = useState('')
-    const [passInvalid,setPassInvalid] = useState(false)
+    const [password, setPassword] = useState('')
+    const [passInvalid, setPassInvalid] = useState(false)
     const { on, toggle } = useContext(LoadingOverlayContext)
     const { pushBannerMessage } = useContext(MessageBannerContext)
     const { setAuth, returnToRoute } = useContext(AuthContext)
@@ -23,7 +22,7 @@ export default function Reset() {
 
     const recover = useCallback(async () => {
         const id = `gid://shopify/Customer/${router.query.user}`
-        if(!password){
+        if (!password) {
             setPassInvalid(true)
             return pushBannerMessage({
                 title: 'Looks like your password might be invalid',
@@ -35,10 +34,10 @@ export default function Reset() {
         const res = await API.resetPassword({
             id,
             password,
-            resetToken: router.query.resetToken as string
+            resetToken: router.query.resetToken as string,
         })
-        const errors = res.res?.errors||[]
-        const userErrors = res.res?.data?.customerReset?.customerUserErrors||[]
+        const errors = res.res?.errors || []
+        const userErrors = res.res?.data?.customerReset?.customerUserErrors || []
         const tokenRes = res.res?.data?.customerReset?.customerAccessToken
         if (res.err) {
             pushBannerMessage({
@@ -52,22 +51,22 @@ export default function Reset() {
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-        }  else if (userErrors.length) {
+        } else if (userErrors.length) {
             pushBannerMessage({
                 title: userErrors[0].message || 'Unknown Error',
                 styling: { backgroundColor: Colors.error },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-        } else if(tokenRes?.accessToken){
+        } else if (tokenRes?.accessToken) {
             pushBannerMessage({
                 title: 'Successfully reset password',
                 styling: { backgroundColor: Colors.success },
                 autoClose: Constants.stdAutoCloseInterval,
             })
-            setAuth({token:tokenRes.accessToken,expiresAt:tokenRes.expiresAt})
-            Utils.storeToken(tokenRes.accessToken,tokenRes.expiresAt)
+            setAuth({ token: tokenRes.accessToken, expiresAt: tokenRes.expiresAt })
+            Utils.storeToken(tokenRes.accessToken, tokenRes.expiresAt)
             router.push('/')
-        } else{
+        } else {
             pushBannerMessage({
                 title: 'Unknown Error',
                 styling: { backgroundColor: Colors.error },
@@ -75,7 +74,7 @@ export default function Reset() {
             })
         }
         toggle(false)
-    }, [toggle, pushBannerMessage, setAuth, router,password,passInvalid])
+    }, [toggle, pushBannerMessage, setAuth, router, password, passInvalid])
 
     return (
         <>

@@ -3,5 +3,18 @@ export const Constants = {
     endPoint: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_API,
     token: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
     stdAutoCloseInterval: 7500,
+    shortAutoCloseInterval: 2000,
     dateFmt: 'MM/DD/YYYY',
+    dateTimeFmt: 'MM/DD/YYYY [at] HH:mm A',
+    defaultCountry: 'United States',
+    footerHeight: (screenWidth?:number)=>{
+        const width = screenWidth||600
+        if(width<400){
+            return 200
+        } else if(width<800){
+            return 150
+        } else{
+            return 100
+        }
+    }
 }

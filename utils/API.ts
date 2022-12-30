@@ -1,4 +1,3 @@
-import Shopify from '@shopify/shopify-api'
 import { CustomerUserError, ShopifyDataProductHandles } from '../types/api'
 import { ShopifyDataFrontPage } from '../types/frontPageAPI'
 import { APIRes } from '../types/misc'
@@ -7,66 +6,66 @@ import { Constants } from './Constants'
 import { Utils } from './Utils'
 
 async function callShopify<Res, Vars = {}>(query: string): Promise<APIRes<Res>> {
-  if (!Constants.endPoint) {
-    return {
-      err: true,
-      message: 'Missing API end point env variable',
+    if (!Constants.endPoint) {
+        return {
+            err: true,
+            message: 'Missing API end point env variable',
+        }
     }
-  }
-  if (!Constants.token) {
-    return {
-      err: true,
-      message: 'Missing API access token env variable',
+    if (!Constants.token) {
+        return {
+            err: true,
+            message: 'Missing API access token env variable',
+        }
     }
-  }
-  let raw: Response | undefined
-  let error: string | undefined
-  try {
-    raw = await fetch(Constants.endPoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Storefront-Access-Token': Constants.token,
-      },
-      body: JSON.stringify({ query }),
-    })
-  } catch (err) {
-    error = err as string
-  }
-  if (!!error) {
-    return {
-      err: true,
-      message: error,
+    let raw: Response | undefined
+    let error: string | undefined
+    try {
+        raw = await fetch(Constants.endPoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Shopify-Storefront-Access-Token': Constants.token,
+            },
+            body: JSON.stringify({ query }),
+        })
+    } catch (err) {
+        error = err as string
     }
-  }
-  let res: undefined | Res
-  try {
-    res = await raw?.json()
-  } catch (err) {
-    error = 'Could not parse JSON response'
-  }
-  if (!!error) {
-    return {
-      err: true,
-      message: error,
+    if (!!error) {
+        return {
+            err: true,
+            message: error,
+        }
     }
-  }
-  return {
-    err: false,
-    res,
-  }
+    let res: undefined | Res
+    try {
+        res = await raw?.json()
+    } catch (err) {
+        error = 'Could not parse JSON response'
+    }
+    if (!!error) {
+        return {
+            err: true,
+            message: error,
+        }
+    }
+    return {
+        err: false,
+        res,
+    }
 }
 
 export interface GetFrontPageParams {
-  amount?: number
+    amount?: number
 }
 
 export interface GetFrontPageRes {
-  data: ShopifyDataFrontPage
+    data: ShopifyDataFrontPage
 }
 
 const getFrontPage = (p?: GetFrontPageParams) =>
-  callShopify<GetFrontPageRes>(`
+    callShopify<GetFrontPageRes>(`
 {
 	collection(handle:"frontpage") {
     products(first:${p?.amount || 20},sortKey: BEST_SELLING) {
@@ -95,17 +94,17 @@ const getFrontPage = (p?: GetFrontPageParams) =>
 `)
 
 export interface GetSingleProductParams {
-  amount?: number
-  handle: string
+    amount?: number
+    handle: string
 }
 
 export interface GetSingleProductRes {
-  data: ShopifyDataSingleProduct
+    data: ShopifyDataSingleProduct
 }
 
 const getSingleProduct = (p: GetSingleProductParams) =>
-  callShopify<GetSingleProductRes>(
-    `
+    callShopify<GetSingleProductRes>(
+        `
     {
         product(handle:"${p.handle}"){
         handle,
@@ -142,14 +141,14 @@ const getSingleProduct = (p: GetSingleProductParams) =>
       }
     }
     `
-  )
+    )
 
 export interface GetProductHandlesRes {
-  data: ShopifyDataProductHandles
+    data: ShopifyDataProductHandles
 }
 
 const getProductHandles = () =>
-  callShopify<GetProductHandlesRes>(`
+    callShopify<GetProductHandlesRes>(`
 {
     collection(handle:"frontpage"){
       products(first:100){
@@ -163,22 +162,22 @@ const getProductHandles = () =>
 `)
 
 export interface CreateCustomerParams {
-  email: string
-  password: string
-  firstName: string
-  lastName: string
-  acceptsEmailMarketing?: boolean
+    email: string
+    password: string
+    firstName: string
+    lastName: string
+    acceptsEmailMarketing?: boolean
 }
 
 export interface CreateCustomerRes {
-  data?: {
-    id?: string | null
-  }
-  errors?: { message?: string }[]
+    data?: {
+        id?: string | null
+    }
+    errors?: { message?: string }[]
 }
 
 const createCustomer = ({ email, firstName, lastName, password, acceptsEmailMarketing }: CreateCustomerParams) =>
-  callShopify<CreateCustomerRes>(`
+    callShopify<CreateCustomerRes>(`
     mutation {
       customerCreate(input:{email:"${email}",password:"${password}",firstName:"${firstName}",lastName:"${lastName}",acceptsMarketing:${!!acceptsEmailMarketing}}){
          customer{
@@ -189,29 +188,29 @@ const createCustomer = ({ email, firstName, lastName, password, acceptsEmailMark
 `)
 
 export interface LoginParams {
-  email: string
-  password: string
+    email: string
+    password: string
 }
 
 export interface LoginRes {
-  data?: {
-    customerAccessTokenCreate?: {
-      customerAccessToken?: {
-        accessToken?: string
-        expiresAt?: string
-      }
-      customerUserErrors?: {
-        code?: string
-        field?: string
-        message?: string
-      }[]
+    data?: {
+        customerAccessTokenCreate?: {
+            customerAccessToken?: {
+                accessToken?: string
+                expiresAt?: string
+            }
+            customerUserErrors?: {
+                code?: string
+                field?: string
+                message?: string
+            }[]
+        }
     }
-  }
-  errors?: { message?: string }[]
+    errors?: { message?: string }[]
 }
 
 const login = ({ email, password }: LoginParams) =>
-  callShopify<LoginRes>(`
+    callShopify<LoginRes>(`
     mutation {
       customerAccessTokenCreate(input:{email:"${email}",password:"${password}"}){
         customerAccessToken{
@@ -228,71 +227,72 @@ const login = ({ email, password }: LoginParams) =>
 `)
 
 export interface ShopifyAddress {
-  address1?: string
-  address2?: string
-  city?: string
-  company?: string
-  firstName?: string
-  lastName?: string
-  id?: string
-  phone?: string
-  zip?: string
-  provinceCode?: string
+    address1?: string
+    address2?: string
+    city?: string
+    company?: string
+    firstName?: string
+    lastName?: string
+    id?: string
+    phone?: string
+    zip?: string
+    provinceCode?: string
 }
 
 export interface GetProfileParams {
-  customerAccessToken: string
+    customerAccessToken: string
 }
 
 export interface GetProfileRes {
-  errors?: { message?: string }[]
-  data?: {
-    customer?: {
-      acceptsMarketing?: boolean | null
-      createdAt?: string | null
-      defaultAddress?: {
-        id?: string
-      }
-      email?: string | null
-      firstName?: string | null
-      lastName?: string | null
-      phone?: string | null
-      lastIncompleteCheckout?: {
-        id?: string | null
-      }
-      orders?: {
-        nodes: ShopifyOrder[]
-      }
-      addresses?: {
-        nodes:ShopifyAddress[]
-      }
+    errors?: { message?: string }[]
+    data?: {
+        customer?: {
+            acceptsMarketing?: boolean | null
+            createdAt?: string | null
+            defaultAddress?: {
+                id?: string
+            }
+            email?: string | null
+            firstName?: string | null
+            lastName?: string | null
+            phone?: string | null
+            lastIncompleteCheckout?: {
+                id?: string | null
+            }
+            orders?: {
+                nodes: ShopifyOrder[]
+            }
+            addresses?: {
+                nodes: ShopifyAddress[]
+            }
+        }
     }
-  }
 }
 
 export interface ShopifyOrder {
-  fufillmentStatus?: string | null
-  cancelReason?: string | null
-  canceledAt?: string | null
-  shippingAddress?: {
-    id?: string | null
-  }
-  orderNumber?: number | null
-  totalPrice?: {
-    amount?: string | null
-  }
-  totalShippingPrice?: {
-    amount?: string | null
-  }
-  totalTax?: {
-    amount?: string | null
-  }
-  processedAt?: string | null
+    fufillmentStatus?: string | null
+    cancelReason?: string | null
+    canceledAt?: string | null
+    shippingAddress?: {
+        id?: string | null
+    }
+    orderNumber?: number | null
+    totalPrice?: {
+        amount?: string | null
+    }
+    totalShippingPrice?: {
+        amount?: string | null
+    }
+    totalTax?: {
+        amount?: string | null
+    }
+    processedAt?: string | null
+    id?: string
 }
 
 const getProfile = ({ customerAccessToken }: GetProfileParams) =>
-  callShopify<GetProfileRes>(
-    `
+    callShopify<GetProfileRes>(
+        `
     {
       customer(customerAccessToken:"${customerAccessToken}"){
         acceptsMarketing,
@@ -309,6 +309,7 @@ const getProfile = ({ customerAccessToken }: GetProfileParams) =>
         },
         orders(first:250){
           nodes{
+            id,
             fulfillmentStatus,
             cancelReason,
             canceledAt,
@@ -347,32 +348,32 @@ const getProfile = ({ customerAccessToken }: GetProfileParams) =>
       }
     }  
   `
-  )
+    )
 
 export interface UpdateCustomerParams {
-  customerAccessToken: string
-  customer: {
-    firstName?: string
-    lastName?: string
-    email?: string
-    phone?: string
-    password?: string
-    acceptsMarketing?: boolean
-  }
+    customerAccessToken: string
+    customer: {
+        firstName?: string
+        lastName?: string
+        email?: string
+        phone?: string
+        password?: string
+        acceptsMarketing?: boolean
+    }
 }
 
 export interface UpdateCustomerRes {
-  errors?: { message?: string }[]
-  data?: {
-    customerUpdate?: {
-      customerUserErrors?: { message?: string; field?: string; code?: string }[]
+    errors?: { message?: string }[]
+    data?: {
+        customerUpdate?: {
+            customerUserErrors?: { message?: string; field?: string; code?: string }[]
+        }
     }
-  }
 }
 
 const updateCustomer = ({ customer, customerAccessToken }: UpdateCustomerParams) =>
-  callShopify<UpdateCustomerRes>(
-    `
+    callShopify<UpdateCustomerRes>(
+        `
   mutation{
     customerUpdate(customerAccessToken:"${customerAccessToken}",customer:{${Utils.inject(customer)}}){
       customerUserErrors{
@@ -383,27 +384,27 @@ const updateCustomer = ({ customer, customerAccessToken }: UpdateCustomerParams)
     }
   }
   `
-  )
+    )
 
 export interface GetAccountDetailsParams {
-  customerAccessToken: string
+    customerAccessToken: string
 }
 
 export interface GetAccountDetailsRes {
-  data?: {
-    customer?: {
-      acceptsMarketing?: boolean
-      firstName?: string
-      lastName?: string
-      email?: string
-      phone?: string
+    data?: {
+        customer?: {
+            acceptsMarketing?: boolean
+            firstName?: string
+            lastName?: string
+            email?: string
+            phone?: string
+        }
     }
-  }
-  errors?: { message: string }[]
+    errors?: { message: string }[]
 }
 
 const getAccountDetails = ({ customerAccessToken }: GetAccountDetailsParams) =>
-  callShopify<GetAccountDetailsRes>(`
+    callShopify<GetAccountDetailsRes>(`
 {
   customer(customerAccessToken:"${customerAccessToken}"){
     acceptsMarketing,
@@ -416,19 +417,20 @@ const getAccountDetails = ({ customerAccessToken }: GetAccountDetailsParams) =>
 `)
 
 export interface RecoverCustomerParams {
-  email: string
+    email: string
 }
 
 export interface RecoverCustomerRes {
-  data?: {
-    customerRecover?: {
-      customerUserErrors?: CustomerUserError[]
+    data?: {
+        customerRecover?: {
+            customerUserErrors?: CustomerUserError[]
+        }
     }
-  }
-  errors?: { message: string }[]
+    errors?: { message: string }[]
 }
 
-const recoverAccount = ({ email }: RecoverCustomerParams) => callShopify<RecoverCustomerRes>(`
+const recoverAccount = ({ email }: RecoverCustomerParams) =>
+    callShopify<RecoverCustomerRes>(`
 mutation {
   customerRecover(email:"${email}"){
     customerUserErrors{
@@ -441,25 +443,26 @@ mutation {
 `)
 
 export interface ResetPasswordParams {
-  password: string
-  id: string
-  resetToken: string
+    password: string
+    id: string
+    resetToken: string
 }
 
 export interface ResetPasswordRes {
-  data?: {
-    customerReset?: {
-      customerAccessToken?: {
-        accessToken?: string
-        expiresAt?: string
-      }
-      customerUserErrors?: CustomerUserError[]
+    data?: {
+        customerReset?: {
+            customerAccessToken?: {
+                accessToken?: string
+                expiresAt?: string
+            }
+            customerUserErrors?: CustomerUserError[]
+        }
     }
-  }
-  errors?: { message: string }[]
+    errors?: { message: string }[]
 }
 
-const resetPassword = ({ password, id, resetToken }: ResetPasswordParams) => callShopify<ResetPasswordRes>(`
+const resetPassword = ({ password, id, resetToken }: ResetPasswordParams) =>
+    callShopify<ResetPasswordRes>(`
 mutation {
   customerReset(id:"${id}",input:{resetToken:"${resetToken}",password:"${password}"}){
     customerAccessToken{
@@ -475,15 +478,282 @@ mutation {
 }
 `)
 
+export interface ChangeDefaultAddressParams {
+    customerAccessToken: string
+    addressID: string
+}
+
+export interface ChangeDefaultAddressRes {
+    data?: {
+        customerDefaultAddressUpdate?: {
+            customerUserErrors?: CustomerUserError[]
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const changeDefaultAddress = ({ addressID, customerAccessToken }: ChangeDefaultAddressParams) =>
+    callShopify<ChangeDefaultAddressRes>(
+        `
+mutation{
+  customerDefaultAddressUpdate(customerAccessToken:"${customerAccessToken}",addressId:"${addressID}"){
+    customerUserErrors{
+      code,
+      field,
+      message
+		}
+	}
+}
+`
+    )
+
+export interface DeleteAddressParams {
+    customerAccessToken: string
+    addressID: string
+}
+
+export interface DeleteAddressRes {
+    data?: {
+        customerAddressDelete?: {
+            deletedCustomerAddressId?: string
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const deleteAddress = ({ addressID, customerAccessToken }: DeleteAddressParams) =>
+    callShopify<DeleteAddressRes>(
+        `
+mutation{
+  customerAddressDelete(id:"${addressID}",customerAccessToken:"${customerAccessToken}"){
+    deletedCustomerAddressId
+	}
+}
+`
+    )
+
+export interface UpdateAddressParams {
+    customerAccessToken: string
+    addressID: string
+    address: {
+        address1?: string
+        address2?: string
+        city?: string
+        company?: string
+        firstName?: string
+        lastName?: string
+        phone?: string
+        zip?: string
+        province?: string
+    }
+}
+
+export interface UpdateAddressRes {
+    data?: {
+        customerAddressUpdate?: {
+            customerUserErrors?: CustomerUserError[]
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const updateAddress = ({ address, addressID, customerAccessToken }: UpdateAddressParams) =>
+    callShopify<UpdateAddressRes>(`
+mutation{
+  customerAddressUpdate(customerAccessToken:"${customerAccessToken}",id:"${addressID}",address:{${Utils.inject(address)}}){
+    customerUserErrors{
+      code,
+      field,
+      message
+    }
+  }
+}
+`)
+
+export interface CreateAddressParams {
+    customerAccessToken: string
+    address: {
+        address1?: string
+        address2?: string
+        city?: string
+        company?: string
+        firstName?: string
+        lastName?: string
+        phone?: string
+        zip?: string
+        province?: string
+    }
+}
+
+export interface UpdateCreateAddressReq {
+    address1?: string
+    address2?: string
+    city?: string
+    company?: string
+    firstName?: string
+    lastName?: string
+    phone?: string
+    zip?: string
+    province?: string
+    markDefault?: boolean
+    id?: string
+}
+
+export interface CreateAddressRes {
+    data?: {
+        customerAddressCreate?: {
+            customerAddress?: {
+                id?: string
+            }
+            customerUserErrors?: CustomerUserError[]
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const createAddress = ({ address, customerAccessToken }: CreateAddressParams) =>
+    callShopify<CreateAddressRes>(
+        `
+mutation{
+  customerAddressCreate(customerAccessToken:"${customerAccessToken}",address:{${Utils.inject({
+            ...address,
+            country: Constants.defaultCountry,
+        })}}){
+    customerAddress{
+      id
+    }
+    customerUserErrors{
+      code,
+      field,
+      message
+    }
+  }
+}
+`
+    )
+
+export interface GetOrderParams {
+    customerAccessToken: string
+    orderID: string
+}
+export interface ShopifyMoney {
+    amount?: string
+}
+export interface ShopifyOrderDetail extends ShopifyOrder {
+    fufillmentStatus?: string
+    financialStatus?: string
+    cancelReason?: string
+    canceledAt?: string
+    orderNumber?: number
+    totalPrice?: ShopifyMoney
+    totalShippingPrice?: ShopifyMoney
+    totalTax?: ShopifyMoney
+    processedAt?: string
+    shippingAddress?: ShopifyAddress
+    id?: string
+    subtotalPrice?: ShopifyMoney
+    lineItems?: {
+        nodes?:ShopifyLineItem[]
+    }
+}
+
+export interface ShopifyLineItem{
+    quantity?: number
+    title?: string
+    originalTotalPrice?: ShopifyMoney
+    discountedTotalPrice?: ShopifyMoney
+    variant?: {
+        sku?: string
+        price?: ShopifyMoney
+    }
+}
+
+export interface GetOrderRes {
+    data?: {
+        customer?: {
+            orders?: {
+                nodes?: ShopifyOrderDetail[]
+            }
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const getOrder = async ({customerAccessToken,orderID}:GetOrderParams) => {
+    
+    const res = await callShopify<GetOrderRes>(`
+{
+    customer(customerAccessToken: "${customerAccessToken}") {
+      orders(first: 250) {
+        nodes {
+          id
+          orderNumber
+          processedAt
+          fulfillmentStatus
+          financialStatus
+          shippingAddress {
+            address1
+            address2
+            city
+            company
+            firstName
+            lastName
+            id
+            provinceCode
+            zip
+          }
+          totalPrice {
+            amount
+          }
+          totalTax {
+            amount
+          }
+          totalShippingPrice {
+            amount
+          }
+          subtotalPrice {
+            amount
+          }
+          lineItems(first:250) {
+            nodes {
+              quantity
+              title
+              originalTotalPrice {
+                amount
+              }
+              discountedTotalPrice {
+                amount
+              }
+              variant {
+                sku,
+                price{
+                    amount
+                  }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`)
+return res.res?.data?.customer?.orders?.nodes?.find(node=>Utils.getIDFromShopifyGid(node.id)===orderID)
+}
+
 export const API = {
-  getFrontPage,
-  getSingleProduct,
-  getProductHandles,
-  createCustomer,
-  login,
-  getProfile,
-  updateCustomer,
-  getAccountDetails,
-  recoverAccount,
-  resetPassword
+    getFrontPage,
+    getSingleProduct,
+    getProductHandles,
+    createCustomer,
+    login,
+    getProfile,
+    updateCustomer,
+    getAccountDetails,
+    recoverAccount,
+    resetPassword,
+    changeDefaultAddress,
+    deleteAddress,
+    updateAddress,
+    createAddress,
+    getOrder
 }

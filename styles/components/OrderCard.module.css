@@ -4,6 +4,11 @@
     -moz-box-shadow: 4px 9px 22px -6px rgba(0, 0, 0, 0.55);
     transition: 300ms;
 }
-.card:hover {
-    transform: scale(1.03);
+
+.link:hover {
+    text-decoration: underline;
+    text-decoration-color: #415a77; /*mid*/
+}
+.link {
+    cursor: pointer;
 }

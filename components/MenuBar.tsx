@@ -33,7 +33,7 @@ export const MenuBar = ({ cartAlerts, toggleCart, toggleMenu, toggleProfile, pro
                 style={{
                     position: 'fixed',
                     backgroundColor: Colors.dark,
-                    width: '100vw',
+                    width: '100%',
                     height: Constants.menuBarHeight,
                     zIndex: ZIndex.sideMenu,
                 }}

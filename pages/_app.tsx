@@ -12,6 +12,9 @@ import { BannerMessage, MessageBannerContext } from '../contexts/MessageBannerCo
 import { MessageBanner } from '../components/MessageBanner'
 import { AuthContext, AuthContextVars } from '../contexts/AuthContext'
 import { Utils } from '../utils/Utils'
+import { Footer } from '../components/Footer'
+import { useWindowSize } from '../hooks/useWindowSize'
+import { Constants } from '../utils/Constants'
 
 export default function App({ Component, pageProps }: AppProps) {
     const [auth, setAuth] = useState<Partial<AuthContextVars>>({})
@@ -19,10 +22,11 @@ export default function App({ Component, pageProps }: AppProps) {
     const [menu, setMenu] = useState(false)
     const [loadingOverlay, setLoadingOverlay] = useState(false)
     const [bannerMessageStack, setBannerMessageStack] = useState<BannerMessage[]>([])
-    const currentMessage = !!bannerMessageStack.length ? bannerMessageStack[bannerMessageStack.length-1] : undefined
+    const currentMessage = !!bannerMessageStack.length ? bannerMessageStack[0] : undefined
     const router = useRouter()
-    const pushBannerMessage = (msg: BannerMessage) => setBannerMessageStack((stack) => [...stack, msg])
+    const pushBannerMessage = (msg: BannerMessage) => setBannerMessageStack((stack) => [msg, ...stack])
     const popBannerMessage = () => setBannerMessageStack((stack) => [...stack.slice(1)])
+    const [width,height] = useWindowSize()
     const logOut = () => {
         setAuth((a) => ({ ...a, token: undefined, expiresAt: undefined }))
         Utils.clearToken()
@@ -61,7 +65,11 @@ export default function App({ Component, pageProps }: AppProps) {
                                 open={menu}
                                 closeMenu={() => setMenu(false)}
                             >
-                                <Component {...pageProps} />
+                                <>  
+                                <div style={{minHeight:height-Constants.menuBarHeight-Constants.footerHeight(width)}}><Component {...pageProps} /></div>
+                                    
+                                    <Footer screenWidth={width}/>
+                                </>
                             </SideMenuWrapper>
                         </LoadingOverlayWrapper>
                     </MessageBannerContext.Provider>

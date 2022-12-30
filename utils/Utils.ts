@@ -11,10 +11,13 @@ const displayPriceRange = (min?: string, max?: string) => {
         return `${Dinero({ amount: nmin }).toFormat('$0,0.00')} - ${Dinero({ amount: nmax }).toFormat('$0,0.00')}`
     }
 }
-const displayPrice = (price?: string, quantity?: number) =>
-    Dinero({ amount: Number(price) * 100, precision: 2 })
+const displayPrice = (price?: string, quantity?: number) =>{
+    const numberPrice = Number(price)
+    if(Number.isNaN(numberPrice)){return ''}
+    return Dinero({ amount: numberPrice*100, precision: 2 })
         .multiply(quantity || 1)
         .toFormat('$0,0.00')
+}
 
 const storeToken = (value?: string, expDate?: string) => {
     if (!value || !expDate) {
@@ -48,17 +51,16 @@ export interface DisplayAddressParams {
 const displayAddress = ({ city, stateCode, zip }: DisplayAddressParams) =>
     city || zip || stateCode ? `${city || 'Unknown City'} ${stateCode || '??'} ${zip || 'Unknown Zip'}` : ``
 
-
 export interface InjectOptions {
     allowEmptyStrings: boolean
 }
 
-const inject = (r: Record<string, Primitive>,p?:InjectOptions) => {
+const inject = (r: Record<string, Primitive>, p?: InjectOptions) => {
     const keys = Object.keys(r)
     return keys
         .filter((key) => {
             let rawVal = r[key]
-            return !!p?.allowEmptyStrings ? rawVal!==null&&rawVal!==undefined : !!rawVal 
+            return !!p?.allowEmptyStrings ? rawVal !== null && rawVal !== undefined : !!rawVal || rawVal === false
         })
         .map((key) => {
             let rawVal = r[key]
@@ -70,20 +72,24 @@ const inject = (r: Record<string, Primitive>,p?:InjectOptions) => {
         .join(',')
 }
 
-const standardizePhone = (s?:string) =>{
-    if(!s){return""}
-    if(s.includes('+')){
+const standardizePhone = (s?: string) => {
+    if (!s) {
+        return ''
+    }
+    if (s.includes('+')) {
         return s
-    } else{
+    } else {
         return `+${s}`
     }
 }
 
-const getIDFromShopifyGid = (gid?:string) =>{
-    if(!gid){return undefined}
+const getIDFromShopifyGid = (gid?: string) => {
+    if (!gid) {
+        return undefined
+    }
     const index = gid.lastIndexOf('/')
     const qindex = gid.indexOf('?')
-    return gid.substring(index,qindex!==-1 ? qindex : undefined)
+    return gid.substring(index+1, qindex !== -1 ? qindex : undefined)
 }
 
 export const Utils = {
@@ -96,5 +102,5 @@ export const Utils = {
     displayAddress,
     inject,
     standardizePhone,
-    getIDFromShopifyGid
+    getIDFromShopifyGid,
 }

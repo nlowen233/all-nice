@@ -6,4 +6,8 @@ export interface ShopifyDataProductHandles {
     }
 }
 
-export interface CustomerUserError { message?: string; field?: string; code?: string }
+export interface CustomerUserError {
+    message?: string
+    field?: string
+    code?: string
+}
