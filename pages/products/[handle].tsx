@@ -2,7 +2,7 @@ import Typography from '@mui/material/Typography'
 import { GetStaticPaths, GetStaticProps } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Carousel } from '../../components/Carousel'
 import { OptionSwiper } from '../../components/OptionSwiper'
 import { QuantityButton } from '../../components/QuantityButton'
@@ -12,6 +12,11 @@ import { Colors } from '../../utils/Colors'
 import { Utils } from '../../utils/Utils'
 import Button from '@mui/material/Button'
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart'
+import { Constants } from '../../utils/Constants'
+import { AuthContext } from '../../contexts/AuthContext'
+import { LoadingOverlayContext } from '../../contexts/LoadingOverlayContext'
+import { MessageBannerContext } from '../../contexts/MessageBannerContext'
+import { CartContext } from '../../contexts/CartContext'
 
 const SIZE_KEY = 'Size'
 const COLOR_KEY = 'Color'
@@ -39,6 +44,8 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export default function Product({ res }: Props) {
+    const { Cart } = useContext(CartContext)
+    const { pushBannerMessage } = useContext(MessageBannerContext)
     const product = res.res?.data.product
     const sizes = product?.options?.find((o) => o.name === SIZE_KEY)?.values || []
     const colors = product?.options?.find((o) => o.name === COLOR_KEY)?.values || []
@@ -54,6 +61,22 @@ export default function Product({ res }: Props) {
         return sizeVal === selectedSize && colorVal === selectedColor
     })
     const selectedVariantPrice = selectedVariant?.price?.amount || undefined
+    const addItem = () => {
+        const id = product?.id
+        if (!id) {
+            return pushBannerMessage({
+                title: 'Could not determie the ID for this product',
+                autoClose: Constants.stdAutoCloseInterval,
+                styling: { backgroundColor: Colors.error },
+            })
+        }
+        Cart.add({
+            params: {
+                lines: [{ merchandiseId: Utils.getIDFromShopifyGid(id) as string, quantity }],
+            },
+        })
+    }
+
     return (
         <>
             <Head>
@@ -73,58 +96,66 @@ export default function Product({ res }: Props) {
                     href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css"
                 />
             </Head>
-            <Carousel
-                items={product?.images?.nodes?.map((n) => ({ id: n.url || '', imgURL: n.url || '' })) || []}
-                activeIndex={index}
-                setActiveIndex={setIndex}
-            />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                <div style={{ paddingLeft: 10 }}>
-                    <Typography variant="h2" color="primary" fontSize={'1.6em'} fontWeight="bold">
-                        {product?.title || 'Unknown Product'}
-                    </Typography>
-                    <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light, paddingLeft: 10 }}>
-                        All Nice Clothing
-                    </Typography>
+            <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
+                <div style={{ width: Constants.screenWidthsm, paddingRight: 5, paddingLeft: 5 }}>
+                    <Carousel
+                        items={product?.images?.nodes?.map((n) => ({ id: n.url || '', imgURL: n.url || '' })) || []}
+                        activeIndex={index}
+                        setActiveIndex={setIndex}
+                    />
+                    <div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                            <div>
+                                <Typography variant="h2" color="primary" fontSize={'1.6em'} fontWeight="bold">
+                                    {product?.title || 'Unknown Product'}
+                                </Typography>
+                                <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light }}>
+                                    All Nice Clothing
+                                </Typography>
+                            </div>
+                            <div style={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }}>
+                                <Typography variant="h3" fontSize={'1.3em'} style={{ color: Colors.light }}>
+                                    {!!selectedVariantPrice && Utils.displayPrice(selectedVariantPrice, quantity)}
+                                </Typography>
+                            </div>
+                        </div>
+                        <Typography variant="h5" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
+                            Size
+                        </Typography>
+                        <OptionSwiper onClickOption={setSelectedSize} options={sizes} selectedOption={selectedSize} />
+                        <Typography variant="h5" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
+                            Color
+                        </Typography>
+                        <OptionSwiper onClickOption={setSelectedColor} options={colors} selectedOption={selectedColor} />
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+                            <QuantityButton onChange={(n) => setQuantity((q) => q + n)} value={quantity} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                            <Button
+                                variant="contained"
+                                endIcon={<AddShoppingCartIcon />}
+                                color="primary"
+                                sx={{ width: 200 }}
+                                onClick={addItem}
+                            >
+                                Add to Cart
+                            </Button>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+                            <Button variant="contained" color="primary" sx={{ width: 200 }}>
+                                Buy Now
+                            </Button>
+                        </div>
+                        <div>
+                            <Typography variant="h5" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold', marginTop: 10 }}>
+                                Product Description
+                            </Typography>
+                            <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.mid }}>
+                                {product?.description}
+                            </Typography>
+                        </div>
+                    </div>
                 </div>
-                <div style={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }}>
-                    <Typography variant="h3" fontSize={'1.3em'} style={{ color: Colors.light, paddingRight: 10, paddingTop: 6 }}>
-                        {!!selectedVariantPrice && Utils.displayPrice(selectedVariantPrice, quantity)}
-                    </Typography>
-                </div>
-            </div>
-            <Typography variant="h5" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold', paddingLeft: 10 }}>
-                Size
-            </Typography>
-            <OptionSwiper onClickOption={setSelectedSize} options={sizes} selectedOption={selectedSize} />
-            <Typography variant="h5" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold', paddingLeft: 10 }}>
-                Color
-            </Typography>
-            <OptionSwiper onClickOption={setSelectedColor} options={colors} selectedOption={selectedColor} />
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
-                <QuantityButton onChange={(n) => setQuantity((q) => q + n)} value={quantity} />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
-                <Button variant="contained" endIcon={<AddShoppingCartIcon />} color="primary" sx={{ width: 200 }}>
-                    Add to Cart
-                </Button>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
-                <Button variant="contained" color="primary" sx={{ width: 200 }}>
-                    Buy Now
-                </Button>
-            </div>
-            <div>
-                <Typography
-                    variant="h5"
-                    fontSize={'1.2em'}
-                    style={{ color: Colors.dark, fontWeight: 'bold', paddingLeft: 10, marginTop: 10 }}
-                >
-                    Product Description
-                </Typography>
-                <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.mid, paddingLeft: 15, paddingRight: 15 }}>
-                    {product?.description}
-                </Typography>
             </div>
         </>
     )

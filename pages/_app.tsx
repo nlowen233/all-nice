@@ -15,9 +15,12 @@ import { Utils } from '../utils/Utils'
 import { Footer } from '../components/Footer'
 import { useWindowSize } from '../hooks/useWindowSize'
 import { Constants } from '../utils/Constants'
+import { useCart } from '../hooks/useCart'
+import { CartContext } from '../contexts/CartContext'
 
 export default function App({ Component, pageProps }: AppProps) {
     const [auth, setAuth] = useState<Partial<AuthContextVars>>({})
+    const { Cart, cart, isCartUpdating } = useCart()
     const [checkedLocalStorage, setCheckedLocalStorage] = useState(false)
     const [menu, setMenu] = useState(false)
     const [loadingOverlay, setLoadingOverlay] = useState(false)
@@ -26,7 +29,7 @@ export default function App({ Component, pageProps }: AppProps) {
     const router = useRouter()
     const pushBannerMessage = (msg: BannerMessage) => setBannerMessageStack((stack) => [msg, ...stack])
     const popBannerMessage = () => setBannerMessageStack((stack) => [...stack.slice(1)])
-    const [width,height] = useWindowSize()
+    const [width, height] = useWindowSize()
     const logOut = () => {
         setAuth((a) => ({ ...a, token: undefined, expiresAt: undefined }))
         Utils.clearToken()
@@ -55,22 +58,26 @@ export default function App({ Component, pageProps }: AppProps) {
                 <ThemeProvider theme={Theme}>
                     <MessageBannerContext.Provider value={{ pushBannerMessage }}>
                         <LoadingOverlayWrapper on={loadingOverlay} toggle={setLoadingOverlay}>
-                            <MessageBanner bannerMessage={currentMessage} close={popBannerMessage} />
-                            <MenuBar profileAlerts={3} menuIsOpen={menu} toggleMenu={() => setMenu((b) => !b)} />
-                            <SideMenuWrapper
-                                links={[
-                                    { link: '/', title: 'Home' },
-                                    { link: '/', title: 'Log Out', onClick: logOut },
-                                ]}
-                                open={menu}
-                                closeMenu={() => setMenu(false)}
-                            >
-                                <>  
-                                <div style={{minHeight:height-Constants.menuBarHeight-Constants.footerHeight(width)}}><Component {...pageProps} /></div>
-                                    
-                                    <Footer screenWidth={width}/>
-                                </>
-                            </SideMenuWrapper>
+                            <CartContext.Provider value={{ Cart, cart, isCartUpdating }}>
+                                <MessageBanner bannerMessage={currentMessage} close={popBannerMessage} />
+                                <MenuBar cartAlerts={cart?.totalQuantity} menuIsOpen={menu} toggleMenu={() => setMenu((b) => !b)} />
+                                <SideMenuWrapper
+                                    links={[
+                                        { link: '/', title: 'Home' },
+                                        { link: '/', title: 'Log Out', onClick: logOut },
+                                    ]}
+                                    open={menu}
+                                    closeMenu={() => setMenu(false)}
+                                >
+                                    <>
+                                        <div style={{ minHeight: height - Constants.menuBarHeight - Constants.footerHeight(width) }}>
+                                            <Component {...pageProps} />
+                                        </div>
+
+                                        <Footer screenWidth={width} />
+                                    </>
+                                </SideMenuWrapper>
+                            </CartContext.Provider>
                         </LoadingOverlayWrapper>
                     </MessageBannerContext.Provider>
                 </ThemeProvider>

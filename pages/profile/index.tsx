@@ -250,12 +250,13 @@ export default function You() {
                 style={{
                     width: '100%',
                     display: 'flex',
-                    justifyContent: 'center',
+                    alignItems: 'center',
                     position: 'relative',
                     pointerEvents: addressPopUp ? 'none' : undefined,
+                    flexDirection: 'column',
                 }}
             >
-                <div style={{ paddingLeft:5,paddingRight:5}}>
+                <div style={{ width: Constants.screenWidthsm }}>
                     <div style={{ display: 'flex', alignItems: 'center', paddingTop: 10, flexDirection: 'column' }}>
                         <Typography variant="h2" fontSize={'1.8em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
                             Account
@@ -268,19 +269,15 @@ export default function You() {
                     >
                         Orders
                     </Typography>
-                    <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                        <CardList
-                            cards={orders.map((order) => <OrderCard order={order} key={order.orderNumber} width={280}/>)}
-                            loadState={loadState}
-                            emptyMessage={'You have no orders'}
-                        />
-                    </div>
+                    <CardList
+                        cards={orders.map((order) => (
+                            <OrderCard order={order} key={order.orderNumber} />
+                        ))}
+                        loadState={loadState}
+                        emptyMessage={'You have no orders'}
+                    />
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography
-                            variant="h4"
-                            fontSize={'1.2em'}
-                            style={{ color: Colors.dark, fontWeight: 'bold', paddingTop: 5, paddingRight: 5 }}
-                        >
+                        <Typography variant="h4" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold', paddingTop: 5 }}>
                             Account Details
                         </Typography>
                         <Link href={'/profile/details'}>

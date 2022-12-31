@@ -11,6 +11,7 @@ import { Pagination } from 'swiper'
 import 'swiper/css/bundle'
 import 'swiper/css'
 import 'swiper/css/pagination'
+import { Constants } from '../utils/Constants'
 
 const GUTTERS = 50
 const SHRINK_CONSTANT = 0.15
@@ -19,16 +20,17 @@ interface Props {
     items: CarouselItem[]
     activeIndex: number
     setActiveIndex: (index: number) => void
+    width?: number
 }
 
-export const Carousel = ({ activeIndex, items, setActiveIndex }: Props) => {
-    const [width] = useWindowSize()
+export const Carousel = ({ activeIndex, items, setActiveIndex, width }: Props) => {
+    const certainWidth = width || Constants.screenWidthsm
     const activeItem: CarouselItem | undefined = ({} = items[activeIndex])
-    const thumbSize = Math.max(width * SHRINK_CONSTANT, 70)
-    const activeImageSize = Math.min(width - GUTTERS, 300)
+    const thumbSize = Math.max(certainWidth * SHRINK_CONSTANT, 70)
+    const activeImageSize = Math.min(certainWidth - GUTTERS, 300)
     return (
-        <>
-            {!!activeItem && (
+        <div style={{ width: certainWidth }}>
+            {!!activeItem ? (
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                     <Image
                         src={activeItem?.imgURL}
@@ -37,46 +39,50 @@ export const Carousel = ({ activeIndex, items, setActiveIndex }: Props) => {
                         alt="Product Image"
                         style={{
                             borderRadius: 10,
-                            margin: 10,
+                            marginTop: 10,
+                            marginBottom: 10,
                         }}
                         className={styles.cardImg}
                         data-lightboxjs="lightbox1"
                     />
                 </div>
+            ) : (
+                <div style={{ height: activeImageSize }} />
             )}
-            <Swiper
-                modules={[Pagination]}
-                slidesPerView={determineSlidesPerView(width)}
-                pagination={{
-                    clickable: true,
-                }}
-                style={{
-                    width: '90%',
-                    height: 110,
-                    minWidth: 320,
-                }}
-            >
-                {items.map((item, i) => (
-                    <SwiperSlide>
-                        <Image
-                            key={item.id}
-                            src={item.imgURL}
-                            width={thumbSize}
-                            height={thumbSize}
-                            alt="Product Image"
-                            style={{
-                                borderRadius: 20,
-                                opacity: i === activeIndex ? 0.5 : 1,
-                                border: `2px solid ${i === activeIndex ? Colors.darkest : Colors.light}`,
-                                cursor: 'pointer',
-                            }}
-                            onClick={() => setActiveIndex(i)}
-                            draggable={false}
-                        />
-                    </SwiperSlide>
-                ))}
-            </Swiper>
-        </>
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                <Swiper
+                    modules={[Pagination]}
+                    slidesPerView={determineSlidesPerView(certainWidth)}
+                    pagination={{
+                        clickable: true,
+                    }}
+                    style={{
+                        height: 110,
+                        width: '100%',
+                    }}
+                >
+                    {items.map((item, i) => (
+                        <SwiperSlide style={{ display: 'flex', justifyContent: 'center' }}>
+                            <Image
+                                key={item.id}
+                                src={item.imgURL}
+                                width={thumbSize}
+                                height={thumbSize}
+                                alt="Product Image"
+                                style={{
+                                    borderRadius: 20,
+                                    opacity: i === activeIndex ? 0.5 : 1,
+                                    border: `2px solid ${i === activeIndex ? Colors.darkest : Colors.light}`,
+                                    cursor: 'pointer',
+                                }}
+                                onClick={() => setActiveIndex(i)}
+                                draggable={false}
+                            />
+                        </SwiperSlide>
+                    ))}
+                </Swiper>
+            </div>
+        </div>
     )
 }
 

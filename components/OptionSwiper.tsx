@@ -10,15 +10,15 @@ type Props = {
     options: string[]
     onClickOption: (option?: string) => void
     selectedOption: string | undefined
+    width?: number
 }
 
-export const OptionSwiper = ({ onClickOption, options, selectedOption }: Props) => {
+export const OptionSwiper = ({ onClickOption, options, selectedOption, width }: Props) => {
     return (
         <Swiper
             slidesPerView={3}
             style={{
-                width: '90%',
-                minWidth: 320,
+                width: width || '100%',
             }}
         >
             {options.map((o) => (

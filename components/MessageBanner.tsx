@@ -44,7 +44,7 @@ export const MessageBanner = ({ bannerMessage, close }: Props) => {
                     justifyContent: 'center',
                     alignItems: 'center',
                     height: '100%',
-                    padding:10
+                    padding: 10,
                 }}
             >
                 <Typography variant="h2" fontSize={'1em'} style={{ color: bannerMessage?.styling?.fontColor || Colors.lightest }}>

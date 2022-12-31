@@ -27,7 +27,6 @@ export const CardList = ({ cards, loadState, pageLimit, slidesPerView, emptyMess
                 pagination={{
                     clickable: true,
                 }}
-                
             >
                 {pagnatedCards.length < 1 ? (
                     !!emptyMessage ? (
@@ -39,21 +38,19 @@ export const CardList = ({ cards, loadState, pageLimit, slidesPerView, emptyMess
                     )
                 ) : (
                     pagnatedCards.map((cards, i) => (
-                        <SwiperSlide style={{overflow:'visible'}}>
-                                {cards.map((card) => (
-                                    <div
-                                        key={card.key}
-                                        style={{
-                                            marginTop: 10,
-                                            marginBottom: 10,
-                                            width: '100%',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                        }}
-                                    >
-                                        {card}
-                                    </div>
-                                ))}
+                        <SwiperSlide style={{ overflow: 'visible' }}>
+                            {cards.map((card) => (
+                                <div
+                                    key={card.key}
+                                    style={{
+                                        marginTop: 10,
+                                        marginBottom: 10,
+                                        width: '100%',
+                                    }}
+                                >
+                                    {card}
+                                </div>
+                            ))}
                         </SwiperSlide>
                     ))
                 )}

@@ -13,13 +13,12 @@ type Props = {
     width?: number
 }
 
-export const OrderCard = ({ order,width }: Props) => {
+export const OrderCard = ({ order, width }: Props) => {
     return (
         <div
             style={{
-                width: width||'100%',
+                width: width || '100%',
                 borderTop: `1px solid ${Colors.lightest}`,
-                padding: 10,
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
                 rowGap: 5,
@@ -28,27 +27,27 @@ export const OrderCard = ({ order,width }: Props) => {
             <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.light }}>
                 Order
             </Typography>
-            <Link href={`/profile/orders/${Utils.getIDFromShopifyGid(order.id)}`} className={styles.link} style={{justifySelf:'right' }}>
-                <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark}}>
+            <Link href={`/profile/orders/${Utils.getIDFromShopifyGid(order.id)}`} className={styles.link} style={{ justifySelf: 'right' }}>
+                <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark }}>
                     #{order.orderNumber}
                 </Typography>
             </Link>
             <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.light }}>
                 Date:
             </Typography>
-            <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark,justifySelf:'right' }}>
+            <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark, justifySelf: 'right' }}>
                 {!!order.processedAt ? dayjs(order.processedAt).format(Constants.dateFmt) : ''}
             </Typography>
             <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.light }}>
                 Total
             </Typography>
-            <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark,justifySelf:'right' }}>
+            <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark, justifySelf: 'right' }}>
                 {!!order.totalPrice?.amount ? Utils.displayPrice(order.totalPrice.amount) : ''}
             </Typography>
             <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.light }}>
                 Fulfillment Status
             </Typography>
-            <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark,justifySelf:'right' }}>
+            <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark, justifySelf: 'right' }}>
                 {order.fufillmentStatus || 'Unknown'}
             </Typography>
         </div>

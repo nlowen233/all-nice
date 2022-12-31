@@ -1,4 +1,4 @@
-import { CustomerUserError, ShopifyDataProductHandles } from '../types/api'
+import { ShopifyDataProductHandles, ShopifyUserError } from '../types/api'
 import { ShopifyDataFrontPage } from '../types/frontPageAPI'
 import { APIRes } from '../types/misc'
 import { ShopifyDataSingleProduct } from '../types/singleProductAPI'
@@ -423,7 +423,7 @@ export interface RecoverCustomerParams {
 export interface RecoverCustomerRes {
     data?: {
         customerRecover?: {
-            customerUserErrors?: CustomerUserError[]
+            customerUserErrors?: ShopifyUserError[]
         }
     }
     errors?: { message: string }[]
@@ -455,7 +455,7 @@ export interface ResetPasswordRes {
                 accessToken?: string
                 expiresAt?: string
             }
-            customerUserErrors?: CustomerUserError[]
+            customerUserErrors?: ShopifyUserError[]
         }
     }
     errors?: { message: string }[]
@@ -486,7 +486,7 @@ export interface ChangeDefaultAddressParams {
 export interface ChangeDefaultAddressRes {
     data?: {
         customerDefaultAddressUpdate?: {
-            customerUserErrors?: CustomerUserError[]
+            customerUserErrors?: ShopifyUserError[]
         }
     }
     errors?: { message: string }[]
@@ -551,7 +551,7 @@ export interface UpdateAddressParams {
 export interface UpdateAddressRes {
     data?: {
         customerAddressUpdate?: {
-            customerUserErrors?: CustomerUserError[]
+            customerUserErrors?: ShopifyUserError[]
         }
     }
     errors?: { message: string }[]
@@ -605,7 +605,7 @@ export interface CreateAddressRes {
             customerAddress?: {
                 id?: string
             }
-            customerUserErrors?: CustomerUserError[]
+            customerUserErrors?: ShopifyUserError[]
         }
     }
     errors?: { message: string }[]
@@ -653,11 +653,11 @@ export interface ShopifyOrderDetail extends ShopifyOrder {
     id?: string
     subtotalPrice?: ShopifyMoney
     lineItems?: {
-        nodes?:ShopifyLineItem[]
+        nodes?: ShopifyLineItem[]
     }
 }
 
-export interface ShopifyLineItem{
+export interface ShopifyLineItem {
     quantity?: number
     title?: string
     originalTotalPrice?: ShopifyMoney
@@ -679,8 +679,7 @@ export interface GetOrderRes {
     errors?: { message: string }[]
 }
 
-const getOrder = async ({customerAccessToken,orderID}:GetOrderParams) => {
-    
+const getOrder = async ({ customerAccessToken, orderID }: GetOrderParams) => {
     const res = await callShopify<GetOrderRes>(`
 {
     customer(customerAccessToken: "${customerAccessToken}") {
@@ -737,8 +736,274 @@ const getOrder = async ({customerAccessToken,orderID}:GetOrderParams) => {
     }
   }
 `)
-return res.res?.data?.customer?.orders?.nodes?.find(node=>Utils.getIDFromShopifyGid(node.id)===orderID)
+    return res.res?.data?.customer?.orders?.nodes?.find((node) => Utils.getIDFromShopifyGid(node.id) === orderID)
 }
+
+export interface CreateOrAddCartLineParams {
+    isNewCart?: boolean
+    lines: {
+        merchandiseId: string
+        quantity: number
+    }[]
+}
+
+export interface CreateCartParams {
+    customerAccessToken?: string
+    lines: {
+        quantity: number
+        merchandiseId: string
+    }[]
+}
+
+export interface MutateCartRes {
+    data?: {
+        cartCreate?: {
+            cart?: CartRes
+            userErrors?: ShopifyUserError[]
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const createCart = ({ customerAccessToken, lines }: CreateCartParams) =>
+    callShopify<MutateCartRes>(`
+mutation {
+  cartCreate(input: {${!!customerAccessToken ? `buyerIdentity: {customerAccessToken: "${customerAccessToken}"},` : ``}lines:[${lines
+        .map((line) => `{${Utils.inject(line)}}`)
+        .join(',')}]}) {
+    cart {
+      buyerIdentity{
+        customer{
+          id
+        }
+      }
+      cost{
+        subtotalAmount{
+          amount
+        }
+        totalAmount{
+          amount
+        }
+        totalTaxAmount{
+          amount
+        } 
+      }
+      createdAt,
+      id,
+      lines{
+        nodes{
+          cost{
+            subtotalAmount{
+              amount
+            }
+            totalAmount{
+              amount
+            }
+          },
+          merchandise{
+            __typename
+          },
+        }
+      }
+    }
+    userErrors {
+      code
+      field
+      message
+    }
+  }
+}
+
+`)
+
+export interface CartRes {
+    totalQuantity?: number
+    buyerIdentity?: {
+        customer?: {
+            id?: string
+        }
+    }
+    cost?: {
+        subtotalAmount?: ShopifyMoney
+        totalAmount?: ShopifyMoney
+        totalTaxAmount?: ShopifyMoney
+    }
+    createdAt?: string
+    id?: string
+    lines?: {
+        nodes?: ShopifyCartLine[]
+    }
+}
+
+export interface GetCartParams {
+    id: string
+}
+
+export interface GetCartRes {
+    data?: {
+        cart?: CartRes
+    }
+    errors?: { message: string }[]
+}
+
+export interface ShopifyCartLine {
+    cost?: {
+        subtotalAmount?: ShopifyMoney
+        totalAmount?: ShopifyMoney
+    }
+    merchandise?: any
+}
+
+const getCart = ({ id }: GetCartParams) =>
+    callShopify<GetCartRes>(`
+{
+  cart(id:"${id}"){
+    buyerIdentity{
+      customer{
+        id
+      }
+    }
+    cost{
+      subtotalAmount{
+        amount
+      }
+      totalAmount{
+        amount
+      }
+      totalTaxAmount{
+        amount
+      } 
+    }
+    createdAt,
+    id,
+    lines{
+      nodes{
+        cost{
+          subtotalAmount{
+            amount
+          }
+          totalAmount{
+            amount
+          }
+        },
+        merchandise{
+          __typename
+        },
+      }
+    }
+	}
+}
+`)
+
+export interface AddCartLineParams {
+    cartID: string
+    lines: {
+        merchandiseId: string
+        quantity: number
+    }[]
+}
+
+const addCartLines = ({ lines, cartID }: AddCartLineParams) =>
+    callShopify<MutateCartRes>(`
+mutation {
+  cartLinesAdd(cartId:"${cartID}",lines:[${lines.map((line) => `{${Utils.inject(line)}}`).join(',')}]){
+    cart{
+      buyerIdentity{
+        customer{
+          id
+        }
+      }
+      cost{
+        subtotalAmount{
+          amount
+        }
+        totalAmount{
+          amount
+        }
+        totalTaxAmount{
+          amount
+        } 
+      }
+      createdAt,
+      id,
+      lines{
+        nodes{
+          cost{
+            subtotalAmount{
+              amount
+            }
+            totalAmount{
+              amount
+            }
+          },
+          merchandise{
+            __typename
+          },
+        }
+      }
+    }
+    userErrors{
+      code,
+      field,
+      message
+    }
+  }
+}
+`)
+
+export interface ReomveCartLineParams {
+    cartID: string
+    lines: string[]
+}
+
+const removeCartLines = ({ cartID, lines }: ReomveCartLineParams) =>
+    callShopify<MutateCartRes>(`
+mutation{
+  cartLinesRemove(cartId:"${cartID}",lineIds:[${lines.map((line) => `"${line}"`).join(',')}]){
+    cart{
+      buyerIdentity{
+        customer{
+          id
+        }
+      }
+      cost{
+        subtotalAmount{
+          amount
+        }
+        totalAmount{
+          amount
+        }
+        totalTaxAmount{
+          amount
+        } 
+      }
+      createdAt,
+      id,
+      lines{
+        nodes{
+          cost{
+            subtotalAmount{
+              amount
+            }
+            totalAmount{
+              amount
+            }
+          },
+          merchandise{
+            __typename
+          },
+        }
+      }
+    }
+    userErrors{
+      code,
+      field,
+      message
+    }
+  }
+  }
+}
+`)
 
 export const API = {
     getFrontPage,
@@ -755,5 +1020,9 @@ export const API = {
     deleteAddress,
     updateAddress,
     createAddress,
-    getOrder
+    getOrder,
+    createCart,
+    getCart,
+    addCartLines,
+    removeCartLines,
 }

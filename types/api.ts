@@ -6,7 +6,7 @@ export interface ShopifyDataProductHandles {
     }
 }
 
-export interface CustomerUserError {
+export interface ShopifyUserError {
     message?: string
     field?: string
     code?: string

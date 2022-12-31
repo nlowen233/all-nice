@@ -11,10 +11,12 @@ const displayPriceRange = (min?: string, max?: string) => {
         return `${Dinero({ amount: nmin }).toFormat('$0,0.00')} - ${Dinero({ amount: nmax }).toFormat('$0,0.00')}`
     }
 }
-const displayPrice = (price?: string, quantity?: number) =>{
+const displayPrice = (price?: string, quantity?: number) => {
     const numberPrice = Number(price)
-    if(Number.isNaN(numberPrice)){return ''}
-    return Dinero({ amount: numberPrice*100, precision: 2 })
+    if (Number.isNaN(numberPrice)) {
+        return ''
+    }
+    return Dinero({ amount: numberPrice * 100, precision: 2 })
         .multiply(quantity || 1)
         .toFormat('$0,0.00')
 }
@@ -89,8 +91,13 @@ const getIDFromShopifyGid = (gid?: string) => {
     }
     const index = gid.lastIndexOf('/')
     const qindex = gid.indexOf('?')
-    return gid.substring(index+1, qindex !== -1 ? qindex : undefined)
+    return gid.substring(index + 1, qindex !== -1 ? qindex : undefined)
 }
+
+const genid = () => Math.floor(Math.random() * 10000000)
+
+const creatAPIMessageFunc = (title: string, fallbackMessage?: string) => (error?: string) =>
+    `${title}:${error || fallbackMessage || 'Unknown Error'}`
 
 export const Utils = {
     windowExists,
@@ -103,4 +110,6 @@ export const Utils = {
     inject,
     standardizePhone,
     getIDFromShopifyGid,
+    genid,
+    creatAPIMessageFunc,
 }
