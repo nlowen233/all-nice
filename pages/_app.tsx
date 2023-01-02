@@ -21,6 +21,8 @@ import { PopUpContext, PopUpMessage, PopUpRes } from '../contexts/PopUpContext'
 import { PopUpDialog } from '../components/PopUpDialog'
 import { useProfile } from '../hooks/useProfile'
 import { ProfileContext } from '../contexts/ProfileContext'
+import { CheckoutContext } from '../contexts/CheckoutContext'
+import { useCheckout } from '../hooks/useCheckout'
 
 export default function App({ Component, pageProps }: AppProps) {
     const [auth, setAuth] = useState<Partial<AuthContextVars>>({})
@@ -43,7 +45,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const { Cart, cart, isCartUpdating, cartDeletionID } = useCart({ pushBannerMessage, token: auth.token })
     const { profile, clear, profileLoading, refresh } = useProfile({ pushBannerMessage, token: auth.token })
-    console.log(profile)
+    const {checkout,createCheckout,creatingCheckout} = useCheckout({pushBannerMessage,token:auth.token})
+    
     const [width, height] = useWindowSize()
     const logOut = () => {
         setAuth((a) => ({ ...a, token: undefined, expiresAt: undefined }))
@@ -87,6 +90,7 @@ export default function App({ Component, pageProps }: AppProps) {
                             <PopUpContext.Provider value={{ pushPopUpMessage, popUpRes }}>
                                 <ProfileContext.Provider value={{ clear, profile, profileLoading, refresh }}>
                                     <CartContext.Provider value={{ Cart, cart, isCartUpdating, cartDeletionID }}>
+                                        <CheckoutContext.Provider value={{checkout,createCheckout,creatingCheckout}}>
                                         <MessageBanner bannerMessage={currentMessage} close={popBannerMessage} />
                                         <MenuBar
                                             cartAlerts={cart?.lines?.nodes?.length || 0}
@@ -120,6 +124,7 @@ export default function App({ Component, pageProps }: AppProps) {
                                             open={dialog}
                                             popUpMessage={currentPopUpMessage}
                                         />
+                                        </CheckoutContext.Provider>
                                     </CartContext.Provider>
                                 </ProfileContext.Provider>
                             </PopUpContext.Provider>

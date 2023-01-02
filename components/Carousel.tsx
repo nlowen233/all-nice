@@ -62,7 +62,7 @@ export const Carousel = ({ activeIndex, items, setActiveIndex, width }: Props) =
                     }}
                 >
                     {items.map((item, i) => (
-                        <SwiperSlide style={{ display: 'flex', justifyContent: 'center' }}>
+                        <SwiperSlide style={{ display: 'flex', justifyContent: 'center' }} key={item.id}>
                             <Image
                                 key={item.id}
                                 src={item.imgURL}

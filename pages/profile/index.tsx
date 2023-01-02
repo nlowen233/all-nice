@@ -181,8 +181,8 @@ export default function You() {
                     setAddressPopUp(false)
                     if (e?.shouldRefresh) {
                         refresh()
-                    } else if (e?.newDefaultID) {
-                        markAddressAsDefault(e.newDefaultID)
+                    } else if (e?.shouldMakeDefaultAddress&&e.shouldMarkDefaultID) {
+                        markAddressAsDefault(e.shouldMarkDefaultID)
                     }
                 }}
                 on={addressPopUp}

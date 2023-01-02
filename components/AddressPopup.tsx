@@ -17,7 +17,9 @@ import { MessageBannerContext } from '../contexts/MessageBannerContext'
 
 export interface AddressPopUpCloseEvent {
     shouldRefresh?: boolean
-    newDefaultID?: string
+    newCreatedID?: string
+    shouldMakeDefaultAddress?: boolean
+    shouldMarkDefaultID?: string
 }
 
 type Props = {
@@ -153,7 +155,7 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, on }: Pr
                 autoClose: Constants.stdAutoCloseInterval,
                 styling: { backgroundColor: Colors.success },
             })
-            close({ shouldRefresh: true, newDefaultID: shouldMarkDefault ? editingAddress?.id : undefined })
+            close({ shouldRefresh: true, shouldMakeDefaultAddress:shouldMarkDefault,shouldMarkDefaultID:editingAddress.id })
         }
         toggle(false)
     }
@@ -180,7 +182,7 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, on }: Pr
                 autoClose: Constants.stdAutoCloseInterval,
                 styling: { backgroundColor: Colors.success },
             })
-            close({ shouldRefresh: true, newDefaultID: shouldMarkDefault ? newID : undefined })
+            close({ shouldRefresh: true, newCreatedID: newID,shouldMakeDefaultAddress:shouldMarkDefault,shouldMarkDefaultID:newID})
         } else {
             pushBannerMessage({
                 title: 'Error creating address, please retry',

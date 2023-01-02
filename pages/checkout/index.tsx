@@ -158,6 +158,7 @@ export default function Checkout() {
                         required
                         error={!validations.email}
                         onFocus={() => setValidations((vals) => ({ ...vals, email: true }))}
+                        disabled={!!token}
                     />
                     <div style={{ display: 'flex',alignItems:'center',paddingTop:10,paddingBottom:5 }}>
                         <Typography
@@ -308,7 +309,7 @@ export default function Checkout() {
                             className={styles.link}
                             onClick={()=>setAddressPopUp(true)}
                         >
-                            Add an address
+                            Use a new address
                         </Typography>
                         </>
                     )}
@@ -328,8 +329,11 @@ export default function Checkout() {
                     setAddressPopUp(false)
                     if (e?.shouldRefresh) {
                         refresh()
-                    } else if (e?.newDefaultID) {
-                        markAddressAsDefault(e.newDefaultID)
+                    } else if (e?.shouldMakeDefaultAddress&&e.shouldMarkDefaultID) {
+                        markAddressAsDefault(e.shouldMarkDefaultID)
+                    }
+                    if(e?.newCreatedID){
+                        setSelectedAddressID(e.newCreatedID)
                     }
                 }}
                 on={addressPopUp}
