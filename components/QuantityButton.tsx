@@ -6,16 +6,27 @@ import { Colors } from '../utils/Colors'
 type Props = {
     value: number
     onChange: (n: number) => void
+    disabled?: boolean
+    max?: number
+    min?:number
 }
 
-export const QuantityButton = ({ onChange, value }: Props) => {
+export const QuantityButton = ({ onChange, value,disabled,max,min }: Props) => {
+    const canDec = (value >= (min||2)) && !disabled
+    const canInc = (value <= (max||98)) && !disabled
     return (
-        <div
-            style={{ display: 'flex', border: `1px solid ${Colors.dark}`, borderRadius: 10, width: 224, backgroundColor: Colors.lightest }}
-        >
-            <Button size="small" onClick={() => onChange(-1)} disabled={value < 2}>
+        <div style={{ display: 'flex', border: `1px solid ${Colors.dark}`, borderRadius: 10, alignItems: 'center' }}>
+            <div
+                onClick={() => canDec && onChange(-1)}
+                style={{
+                    color: canDec ? undefined : Colors.disabled,
+                    cursor: canDec ? 'pointer' : undefined,
+                    paddingRight: 5,
+                    paddingLeft: 10,
+                }}
+            >
                 -
-            </Button>
+            </div>
             <Typography
                 variant="subtitle1"
                 fontSize={'1em'}
@@ -23,9 +34,17 @@ export const QuantityButton = ({ onChange, value }: Props) => {
             >
                 Quantity: {value}
             </Typography>
-            <Button size="small" onClick={() => onChange(1)} disabled={value > 98}>
+            <div
+                onClick={() => canInc && onChange(1)}
+                style={{
+                    color: canInc ? undefined : Colors.disabled,
+                    cursor: canInc ? 'pointer' : undefined,
+                    paddingRight: 10,
+                    paddingLeft: 5,
+                }}
+            >
                 +
-            </Button>
+            </div>
         </div>
     )
 }

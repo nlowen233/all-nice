@@ -5,7 +5,7 @@ export const Constants = {
     endPoint: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_API,
     token: process.env.NEXT_PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN,
     stdAutoCloseInterval: 7500,
-    shortAutoCloseInterval: 2000,
+    shortAutoCloseInterval: 3000,
     dateFmt: 'MM/DD/YYYY',
     dateTimeFmt: 'MM/DD/YYYY [at] HH:mm A',
     defaultCountry: 'United States',
@@ -22,4 +22,5 @@ export const Constants = {
     screenWidthsm: 280,
     cartError: Utils.creatAPIMessageFunc('Cart update error'),
     ls_cartID: 'CART_ID',
+    stdButtonSize: 200
 }

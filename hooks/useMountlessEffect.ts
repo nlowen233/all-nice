@@ -4,7 +4,10 @@ export const useMountlessEffect = (callback: () => void, deps: React.DependencyL
     const didMount = useRef(false)
 
     useEffect(() => {
-        if (didMount.current) callback()
-        else didMount.current = true
+        if (didMount.current) {
+            callback()
+        } else {
+            didMount.current = true
+        }
     }, deps)
 }

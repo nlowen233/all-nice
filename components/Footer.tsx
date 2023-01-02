@@ -9,7 +9,7 @@ type Props = {
 
 export const Footer = ({ screenWidth }: Props) => {
     return (
-        <div style={{ backgroundColor: Colors.darkest, width: '100%', height: Constants.footerHeight(screenWidth) }}>
+        <div style={{ backgroundColor: Colors.darkest, width: '100%', height: Constants.footerHeight(screenWidth), opacity: 1 }}>
             <div style={{ padding: 20, backgroundColor: Colors.darkest }}>
                 <Typography color="secondary" variant="subtitle1">
                     Follow us on insta

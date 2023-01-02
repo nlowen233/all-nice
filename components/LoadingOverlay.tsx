@@ -1,3 +1,4 @@
+import { CircularProgress } from '@mui/material'
 import React from 'react'
 import { ClockLoader } from 'react-spinners'
 import { ZIndex } from '../types/ZIndex'
@@ -27,7 +28,7 @@ export const LoadingOverlay = ({ loading }: Props) => {
                     transition: '100ms',
                 }}
             >
-                <ClockLoader size={100} color={Colors.lightest} />
+                <CircularProgress />
             </div>
         </div>
     )

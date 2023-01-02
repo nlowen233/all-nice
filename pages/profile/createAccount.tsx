@@ -139,8 +139,8 @@ export default function CreateAccount() {
     return (
         <>
             <Head>
-                <title>Create an Account</title>
-                <meta name="description" content="Home page for All Nice Clothing" />
+                <title>Create Account - All Nice Clothing</title>
+                <meta name="description" content="Create your new All Nice Clothing account to make shopping faster" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

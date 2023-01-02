@@ -44,7 +44,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export default function Product({ res }: Props) {
-    const { Cart } = useContext(CartContext)
+    const { Cart, isCartUpdating } = useContext(CartContext)
     const { pushBannerMessage } = useContext(MessageBannerContext)
     const product = res.res?.data.product
     const sizes = product?.options?.find((o) => o.name === SIZE_KEY)?.values || []
@@ -62,17 +62,17 @@ export default function Product({ res }: Props) {
     })
     const selectedVariantPrice = selectedVariant?.price?.amount || undefined
     const addItem = () => {
-        const id = product?.id
-        if (!id) {
+        const variantID = selectedVariant?.id
+        if (!variantID) {
             return pushBannerMessage({
-                title: 'Could not determie the ID for this product',
+                title: 'Could not determine the ID for this product',
                 autoClose: Constants.stdAutoCloseInterval,
                 styling: { backgroundColor: Colors.error },
             })
         }
         Cart.add({
             params: {
-                lines: [{ merchandiseId: Utils.getIDFromShopifyGid(id) as string, quantity }],
+                item: { merchandiseId: variantID, quantity },
             },
         })
     }
@@ -80,8 +80,8 @@ export default function Product({ res }: Props) {
     return (
         <>
             <Head>
-                <title>{product?.title || 'All Nice Clothing Product'}</title>
-                <meta name="description" content={`Images, description, purchasing for ${product?.title}`} />
+                <title>{`${product?.title|| 'Product'} - All Nice Clothing`}</title>
+                <meta name="description" content={product?.description||"Check out this (nice) product out of All Nice Clothing"} />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
                 <link
@@ -137,16 +137,12 @@ export default function Product({ res }: Props) {
                                 color="primary"
                                 sx={{ width: 200 }}
                                 onClick={addItem}
+                                disabled={isCartUpdating}
                             >
                                 Add to Cart
                             </Button>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
-                            <Button variant="contained" color="primary" sx={{ width: 200 }}>
-                                Buy Now
-                            </Button>
-                        </div>
-                        <div>
+                        <div style={{paddingTop:10,paddingBottom:10}}>
                             <Typography variant="h5" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold', marginTop: 10 }}>
                                 Product Description
                             </Typography>

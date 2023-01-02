@@ -17,18 +17,30 @@ import { useWindowSize } from '../hooks/useWindowSize'
 import { Constants } from '../utils/Constants'
 import { useCart } from '../hooks/useCart'
 import { CartContext } from '../contexts/CartContext'
+import { PopUpContext, PopUpMessage, PopUpRes } from '../contexts/PopUpContext'
+import { PopUpDialog } from '../components/PopUpDialog'
 
 export default function App({ Component, pageProps }: AppProps) {
     const [auth, setAuth] = useState<Partial<AuthContextVars>>({})
-    const { Cart, cart, isCartUpdating } = useCart()
     const [checkedLocalStorage, setCheckedLocalStorage] = useState(false)
     const [menu, setMenu] = useState(false)
+    const [dialog,setDialog] = useState(false)
+
+    const [popUpMessageStack,setPopUpMessageStack] = useState<PopUpMessage[]>([])
+    const [popUpRes,setPopUpRes] = useState<PopUpRes|undefined>(undefined)
+    const currentPopUpMessage = !!popUpMessageStack.length ? popUpMessageStack[0] : undefined
+    const pushPopUpMessage = (msg: PopUpMessage) => setPopUpMessageStack((stack) => [msg, ...stack])
+    const popPopUpMessage = () => setPopUpMessageStack((stack) => [...stack.slice(1)])
+    
     const [loadingOverlay, setLoadingOverlay] = useState(false)
     const [bannerMessageStack, setBannerMessageStack] = useState<BannerMessage[]>([])
     const currentMessage = !!bannerMessageStack.length ? bannerMessageStack[0] : undefined
     const router = useRouter()
     const pushBannerMessage = (msg: BannerMessage) => setBannerMessageStack((stack) => [msg, ...stack])
     const popBannerMessage = () => setBannerMessageStack((stack) => [...stack.slice(1)])
+    
+    const { Cart, cart, isCartUpdating, cartDeletionID } = useCart({ pushBannerMessage, token: auth.token })
+    console.log(cart)
     const [width, height] = useWindowSize()
     const logOut = () => {
         setAuth((a) => ({ ...a, token: undefined, expiresAt: undefined }))
@@ -39,6 +51,16 @@ export default function App({ Component, pageProps }: AppProps) {
             setMenu(false)
         }
     }, [router.asPath])
+    useMountlessEffect(()=>{
+        if(popUpMessageStack.length){
+            setDialog(true)
+        }
+    },[popUpMessageStack])
+    useMountlessEffect(()=>{
+        if(popUpRes){
+            setPopUpRes(undefined)
+        }
+    },[popUpRes])
     useEffect(() => {
         router.events.on('routeChangeStart', () => setLoadingOverlay(true))
         router.events.on('routeChangeComplete', () => setLoadingOverlay(false))
@@ -50,6 +72,7 @@ export default function App({ Component, pageProps }: AppProps) {
         }
         setCheckedLocalStorage(true)
     }, [])
+    
     return (
         <>
             <AuthContext.Provider
@@ -58,9 +81,14 @@ export default function App({ Component, pageProps }: AppProps) {
                 <ThemeProvider theme={Theme}>
                     <MessageBannerContext.Provider value={{ pushBannerMessage }}>
                         <LoadingOverlayWrapper on={loadingOverlay} toggle={setLoadingOverlay}>
-                            <CartContext.Provider value={{ Cart, cart, isCartUpdating }}>
+                            <PopUpContext.Provider value={{pushPopUpMessage,popUpRes}}>
+                            <CartContext.Provider value={{ Cart, cart, isCartUpdating, cartDeletionID }}>
                                 <MessageBanner bannerMessage={currentMessage} close={popBannerMessage} />
-                                <MenuBar cartAlerts={cart?.totalQuantity} menuIsOpen={menu} toggleMenu={() => setMenu((b) => !b)} />
+                                <MenuBar
+                                    cartAlerts={cart?.lines?.nodes?.length || 0}
+                                    menuIsOpen={menu}
+                                    toggleMenu={() => setMenu((b) => !b)}
+                                />
                                 <SideMenuWrapper
                                     links={[
                                         { link: '/', title: 'Home' },
@@ -77,7 +105,17 @@ export default function App({ Component, pageProps }: AppProps) {
                                         <Footer screenWidth={width} />
                                     </>
                                 </SideMenuWrapper>
+                                <PopUpDialog
+                                    close={(res)=>{
+                                        setDialog(false)
+                                        setPopUpRes(res)
+                                        setTimeout(popPopUpMessage,1000)
+                                    }}
+                                    open={dialog}
+                                    popUpMessage={currentPopUpMessage}
+                                />
                             </CartContext.Provider>
+                            </PopUpContext.Provider>
                         </LoadingOverlayWrapper>
                     </MessageBannerContext.Provider>
                 </ThemeProvider>

@@ -73,8 +73,8 @@ export default function Login() {
     return (
         <>
             <Head>
-                <title>All Nice Clothing</title>
-                <meta name="description" content="Home page for All Nice Clothing" />
+                <title>Login - All Nice Clothing</title>
+                <meta name="description" content="Login to your All Nice Clothing account for deals and fast checkout" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

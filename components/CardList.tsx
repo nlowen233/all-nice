@@ -27,11 +27,15 @@ export const CardList = ({ cards, loadState, pageLimit, slidesPerView, emptyMess
                 pagination={{
                     clickable: true,
                 }}
+                style={{
+                    paddingBottom:20
+                }}
+                grabCursor
             >
                 {pagnatedCards.length < 1 ? (
                     !!emptyMessage ? (
                         <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
-                            You haven't ordered anything :{`(`}
+                           {emptyMessage}
                         </Typography>
                     ) : (
                         <></>
@@ -39,18 +43,7 @@ export const CardList = ({ cards, loadState, pageLimit, slidesPerView, emptyMess
                 ) : (
                     pagnatedCards.map((cards, i) => (
                         <SwiperSlide style={{ overflow: 'visible' }}>
-                            {cards.map((card) => (
-                                <div
-                                    key={card.key}
-                                    style={{
-                                        marginTop: 10,
-                                        marginBottom: 10,
-                                        width: '100%',
-                                    }}
-                                >
-                                    {card}
-                                </div>
-                            ))}
+                            {cards.map((card) => card)}
                         </SwiperSlide>
                     ))
                 )}

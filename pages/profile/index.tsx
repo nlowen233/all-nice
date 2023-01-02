@@ -241,8 +241,8 @@ export default function You() {
     return (
         <>
             <Head>
-                <title>Profile - All Nice</title>
-                <meta name="description" content="Home page for All Nice Clothing" />
+                <title>Profile - All Nice Clothing</title>
+                <meta name="description" content="Check your shipping address, order history, and more for All Nice Clothing" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

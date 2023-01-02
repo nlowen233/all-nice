@@ -59,8 +59,8 @@ export default function Order() {
     return (
         <>
             <Head>
-                <title>All Nice Clothing</title>
-                <meta name="description" content="Home page for All Nice Clothing" />
+                <title>{`Order #${order?.orderNumber} - All Nice Clothing`}</title>
+                <meta name="description" content="Checkout your current/previous orders at All Nice Clothing" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

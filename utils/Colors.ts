@@ -5,6 +5,7 @@ export const Colors = {
     light: '#778da9',
     lightest: '#e0e1dd',
     error: '#c41b3b',
-    success: '#64e262',
+    success: '#12ac03',
     star: '#c9aa1c',
+    disabled: '#e8e8e8',
 }

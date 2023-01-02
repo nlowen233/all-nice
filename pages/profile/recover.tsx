@@ -68,8 +68,8 @@ export default function CreateAccount() {
     return (
         <>
             <Head>
-                <title>Recover Account</title>
-                <meta name="description" content="Home page for All Nice Clothing" />
+                <title>Recover Account - All Nice Clothing</title>
+                <meta name="description" content="Recover your All Nice Clothing acount" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>

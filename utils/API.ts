@@ -3,6 +3,7 @@ import { ShopifyDataFrontPage } from '../types/frontPageAPI'
 import { APIRes } from '../types/misc'
 import { ShopifyDataSingleProduct } from '../types/singleProductAPI'
 import { Constants } from './Constants'
+import { QueryStrings } from './QueryStrings'
 import { Utils } from './Utils'
 
 async function callShopify<Res, Vars = {}>(query: string): Promise<APIRes<Res>> {
@@ -127,6 +128,7 @@ const getSingleProduct = (p: GetSingleProductParams) =>
         totalInventory,
         variants(first:100) {
             nodes{
+              id,
               availableForSale,
               quantityAvailable,
               price{
@@ -741,21 +743,24 @@ const getOrder = async ({ customerAccessToken, orderID }: GetOrderParams) => {
 
 export interface CreateOrAddCartLineParams {
     isNewCart?: boolean
-    lines: {
+    item: {
         merchandiseId: string
         quantity: number
-    }[]
+    }
 }
 
-export interface CreateCartParams {
+export interface CreateCart {
+    line: {
+        quantity: number
+        merchandiseId: string
+    }
+}
+
+export interface CreateCartParams extends CreateCart {
     customerAccessToken?: string
-    lines: {
-        quantity: number
-        merchandiseId: string
-    }[]
 }
 
-export interface MutateCartRes {
+export interface MutateCartResCreate {
     data?: {
         cartCreate?: {
             cart?: CartRes
@@ -765,46 +770,14 @@ export interface MutateCartRes {
     errors?: { message: string }[]
 }
 
-const createCart = ({ customerAccessToken, lines }: CreateCartParams) =>
-    callShopify<MutateCartRes>(`
+const createCart = ({ customerAccessToken, line }: CreateCartParams) =>
+    callShopify<MutateCartResCreate>(`
 mutation {
-  cartCreate(input: {${!!customerAccessToken ? `buyerIdentity: {customerAccessToken: "${customerAccessToken}"},` : ``}lines:[${lines
-        .map((line) => `{${Utils.inject(line)}}`)
-        .join(',')}]}) {
+  cartCreate(input: {${
+      !!customerAccessToken ? `buyerIdentity: {customerAccessToken: "${customerAccessToken}"},` : ``
+  }lines:[{${Utils.inject(line)}}]}) {
     cart {
-      buyerIdentity{
-        customer{
-          id
-        }
-      }
-      cost{
-        subtotalAmount{
-          amount
-        }
-        totalAmount{
-          amount
-        }
-        totalTaxAmount{
-          amount
-        } 
-      }
-      createdAt,
-      id,
-      lines{
-        nodes{
-          cost{
-            subtotalAmount{
-              amount
-            }
-            totalAmount{
-              amount
-            }
-          },
-          merchandise{
-            __typename
-          },
-        }
-      }
+      ${QueryStrings.cart}
     }
     userErrors {
       code
@@ -847,100 +820,63 @@ export interface GetCartRes {
 }
 
 export interface ShopifyCartLine {
+    id?: string
     cost?: {
         subtotalAmount?: ShopifyMoney
         totalAmount?: ShopifyMoney
     }
-    merchandise?: any
+    quantity?: number
+    merchandise?: CartLineItem
+}
+
+export interface CartLineItem {
+    id?: string
+    product?: {
+        featuredImage?: {
+            url?: string
+        }
+        handle?: string
+        title?: string
+    }
+    title?: string
 }
 
 const getCart = ({ id }: GetCartParams) =>
     callShopify<GetCartRes>(`
 {
   cart(id:"${id}"){
-    buyerIdentity{
-      customer{
-        id
-      }
-    }
-    cost{
-      subtotalAmount{
-        amount
-      }
-      totalAmount{
-        amount
-      }
-      totalTaxAmount{
-        amount
-      } 
-    }
-    createdAt,
-    id,
-    lines{
-      nodes{
-        cost{
-          subtotalAmount{
-            amount
-          }
-          totalAmount{
-            amount
-          }
-        },
-        merchandise{
-          __typename
-        },
-      }
-    }
+    ${QueryStrings.cart}
 	}
 }
 `)
 
-export interface AddCartLineParams {
-    cartID: string
-    lines: {
+export interface AddCartLine {
+    line: {
         merchandiseId: string
         quantity: number
-    }[]
+    }
 }
 
-const addCartLines = ({ lines, cartID }: AddCartLineParams) =>
-    callShopify<MutateCartRes>(`
+export interface AddCartLineParams extends AddCartLine {
+    cartID: string
+}
+
+export interface MutateCartResAdd {
+    data?: {
+        cartLinesAdd?: {
+            cart?: CartRes
+            userErrors?: ShopifyUserError[]
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const addCartLine = ({ line, cartID }: AddCartLineParams) =>
+    callShopify<MutateCartResAdd>(`
 mutation {
-  cartLinesAdd(cartId:"${cartID}",lines:[${lines.map((line) => `{${Utils.inject(line)}}`).join(',')}]){
+  cartLinesAdd(cartId:"${cartID}",lines:[{${Utils.inject(line)}}]){
     cart{
-      buyerIdentity{
-        customer{
-          id
-        }
-      }
-      cost{
-        subtotalAmount{
-          amount
-        }
-        totalAmount{
-          amount
-        }
-        totalTaxAmount{
-          amount
-        } 
-      }
-      createdAt,
-      id,
-      lines{
-        nodes{
-          cost{
-            subtotalAmount{
-              amount
-            }
-            totalAmount{
-              amount
-            }
-          },
-          merchandise{
-            __typename
-          },
-        }
-      }
+      ${QueryStrings.cart}
     }
     userErrors{
       code,
@@ -951,56 +887,71 @@ mutation {
 }
 `)
 
-export interface ReomveCartLineParams {
-    cartID: string
-    lines: string[]
+export interface RemoveCartLine {
+    id: string
 }
 
-const removeCartLines = ({ cartID, lines }: ReomveCartLineParams) =>
-    callShopify<MutateCartRes>(`
-mutation{
-  cartLinesRemove(cartId:"${cartID}",lineIds:[${lines.map((line) => `"${line}"`).join(',')}]){
+export interface ReomveCartLineParams extends RemoveCartLine {
+    cartID: string
+}
+
+export interface MutateCartResRemove {
+    data?: {
+        cartLinesRemove?: {
+            cart?: CartRes
+            userErrors?: ShopifyUserError[]
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const removeCartLine = ({ cartID, id }: ReomveCartLineParams) =>
+    callShopify<MutateCartResRemove>(`
+    mutation {
+      cartLinesRemove(cartId: "${cartID}", lineIds: ["${id}"]) {
+        cart {
+          ${QueryStrings.cart}
+        }
+        userErrors {
+          code
+          field
+          message
+        }
+      }
+    }
+`)
+
+export interface UpdateCartLine {
+    lineID: string
+    quantity: number
+}
+
+export interface UpdateCartLineParams extends UpdateCartLine {
+    cartID: string
+}
+
+export interface MutateCartResUpdate {
+    data?: {
+        cartLinesUpdate?: {
+            cart?: CartRes
+            userErrors?: ShopifyUserError[]
+        }
+    }
+    errors?: { message: string }[]
+}
+
+const updateCartLine = ({ cartID, lineID, quantity }: UpdateCartLineParams) =>
+    callShopify<MutateCartResUpdate>(`
+mutation {
+  cartLinesUpdate(cartId:"${cartID}",lines:[{id:"${lineID}",quantity:${quantity}}]){
     cart{
-      buyerIdentity{
-        customer{
-          id
-        }
-      }
-      cost{
-        subtotalAmount{
-          amount
-        }
-        totalAmount{
-          amount
-        }
-        totalTaxAmount{
-          amount
-        } 
-      }
-      createdAt,
-      id,
-      lines{
-        nodes{
-          cost{
-            subtotalAmount{
-              amount
-            }
-            totalAmount{
-              amount
-            }
-          },
-          merchandise{
-            __typename
-          },
-        }
-      }
+      ${QueryStrings.cart}
     }
     userErrors{
       code,
       field,
       message
     }
-  }
   }
 }
 `)
@@ -1023,6 +974,7 @@ export const API = {
     getOrder,
     createCart,
     getCart,
-    addCartLines,
-    removeCartLines,
+    addCartLine,
+    removeCartLine,
+    updateCartLine,
 }

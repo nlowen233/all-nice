@@ -14,6 +14,7 @@ export interface ShopifyProductSingleProduct {
     options?: ShopifyOptionsSingleProduct[]
     variants?: {
         nodes?: {
+            id?: string
             availableForSale?: boolean | null
             quantityAvailable?: number | null
             price?: {

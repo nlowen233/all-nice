@@ -79,8 +79,8 @@ export default function Reset() {
     return (
         <>
             <Head>
-                <title>Recover Account</title>
-                <meta name="description" content="Home page for All Nice Clothing" />
+                <title>Reset Password - All Nice Clothing</title>
+                <meta name="description" content="Set your new password and get shopping" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
