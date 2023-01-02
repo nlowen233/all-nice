@@ -48,11 +48,6 @@ export default function You() {
         }
         return 0
     })
-    const logOut = () => {
-        setAuth((a) => ({ ...a, expiresAt: undefined, token: undefined }))
-        Utils.clearToken()
-        router.push('/')
-    }
     const deleteAddress = async (addressID: string) => {
         toggle(true)
         const res = await API.deleteAddress({ addressID, customerAccessToken: token as string })
@@ -338,16 +333,6 @@ export default function You() {
                             )}
                         </LoaderWrapper>
                     </div>
-
-                    <Typography
-                        variant="subtitle1"
-                        fontSize={'1em'}
-                        style={{ color: Colors.mid, textDecorationColor: Colors.mid }}
-                        className={styles.link}
-                        onClick={logOut}
-                    >
-                        Log out
-                    </Typography>
                 </div>
             </div>
             <AddressPopup
