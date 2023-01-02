@@ -21,6 +21,8 @@ export const Constants = {
     },
     screenWidthsm: 280,
     cartError: Utils.creatAPIMessageFunc('Cart update error'),
+    checkoutError: Utils.creatAPIMessageFunc('Checkout error'),
     ls_cartID: 'CART_ID',
-    stdButtonSize: 200
+    stdButtonSize: 200,
+    checkoutLineItemHeight: 75, //this is not enforced by the card itself
 }

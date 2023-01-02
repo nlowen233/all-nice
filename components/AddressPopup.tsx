@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { ShopifyAddress, UpdateCreateAddressReq } from '../utils/API'
+import React, { useState, useRef, useEffect, useContext } from 'react'
+import { API, ShopifyAddress, UpdateCreateAddressReq } from '../utils/API'
 import styles from '../styles/components/AddressPopUp.module.css'
 import { Colors } from '../utils/Colors'
 import { Button, Checkbox, Drawer, FormControlLabel, FormGroup, TextField, Typography } from '@mui/material'
@@ -10,14 +10,21 @@ import { useOnClickOutside } from 'usehooks-ts'
 import { Poppins } from '@next/font/google'
 import { useWindowSize } from '../hooks/useWindowSize'
 import { Constants } from '../utils/Constants'
+import { ProfileContext } from '../contexts/ProfileContext'
+import { AuthContext } from '../contexts/AuthContext'
+import { LoadingOverlayContext } from '../contexts/LoadingOverlayContext'
+import { MessageBannerContext } from '../contexts/MessageBannerContext'
+
+export interface AddressPopUpCloseEvent {
+    shouldRefresh?: boolean
+    newDefaultID?: string
+}
 
 type Props = {
     editingAddress?: ShopifyAddress
     isDefaultAddress?: boolean
     on?: boolean
-    close: () => void
-    onDeleteAddress: (id: string) => void
-    onUpdateAddress: (add: UpdateCreateAddressReq) => void
+    close: (p?: AddressPopUpCloseEvent) => void
 }
 
 interface Validations {
@@ -44,7 +51,7 @@ const INIT_VALIDS = (): Validations => ({
     company: true,
 })
 
-export const AddressPopup = ({ editingAddress, isDefaultAddress, close, onDeleteAddress, onUpdateAddress, on }: Props) => {
+export const AddressPopup = ({ editingAddress, isDefaultAddress, close, on }: Props) => {
     const [address1, setAddress1] = useState(editingAddress?.address1)
     const [address2, setAddress2] = useState(editingAddress?.address2)
     const [city, setCity] = useState(editingAddress?.city)
@@ -54,8 +61,11 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, onDelete
     const [company, setCompany] = useState(editingAddress?.company)
     const [phone, setPhone] = useState(editingAddress?.phone)
     const [zip, setZip] = useState(editingAddress?.zip)
-    const [isDefault, setIsDefault] = useState(!!isDefaultAddress)
+    const [shouldMarkDefault, setShouldMarkDefault] = useState(!!isDefaultAddress)
     const [validations, setValidations] = useState<Validations>(INIT_VALIDS())
+    const { token, checkedLocalStorage, setAuth } = useContext(AuthContext)
+    const { toggle } = useContext(LoadingOverlayContext)
+    const { pushBannerMessage } = useContext(MessageBannerContext)
 
     const cleanUp = () => {
         setAddress1('')
@@ -67,7 +77,7 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, onDelete
         setCompany('')
         setPhone('')
         setZip('')
-        setIsDefault(false)
+        setShouldMarkDefault(false)
         setValidations(INIT_VALIDS())
     }
 
@@ -84,7 +94,101 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, onDelete
         setCompany(editingAddress?.company)
         setPhone(editingAddress?.phone)
         setZip(editingAddress?.zip)
-        setIsDefault(!!isDefaultAddress)
+        setShouldMarkDefault(!!isDefaultAddress)
+    }
+
+    const deleteAddress = async () => {
+        const id = editingAddress?.id
+        if (!id) {
+            return
+        }
+        toggle(true)
+        const res = await API.deleteAddress({ addressID: id, customerAccessToken: token as string })
+        if (res.res?.data?.customerAddressDelete?.deletedCustomerAddressId) {
+            pushBannerMessage({
+                title: 'Successfully deleted address',
+                autoClose: Constants.stdAutoCloseInterval,
+                styling: { backgroundColor: Colors.success },
+            })
+            close({ shouldRefresh: true })
+        } else {
+            pushBannerMessage({
+                title: 'Error deleting address',
+                autoClose: Constants.stdAutoCloseInterval,
+                styling: { backgroundColor: Colors.error },
+            })
+        }
+        toggle(false)
+    }
+    const updateAddress = async () => {
+        const id = editingAddress?.id
+        if (!id) {
+            return
+        }
+        toggle(true)
+        const res = await API.updateAddress({
+            addressID: id,
+            customerAccessToken: token as string,
+            address: {
+                address1,
+                address2,
+                city,
+                company,
+                firstName,
+                lastName,
+                phone,
+                province: stateCode,
+                zip,
+            },
+        })
+        if (res.res?.data?.customerAddressUpdate?.customerUserErrors?.length || res.err || res.res?.errors?.length) {
+            pushBannerMessage({
+                title: 'Error updating address, please retry',
+                autoClose: Constants.stdAutoCloseInterval,
+                styling: { backgroundColor: Colors.error },
+            })
+        } else {
+            pushBannerMessage({
+                title: 'Successfully updated address',
+                autoClose: Constants.stdAutoCloseInterval,
+                styling: { backgroundColor: Colors.success },
+            })
+            close({ shouldRefresh: true, newDefaultID: shouldMarkDefault ? editingAddress?.id : undefined })
+        }
+        toggle(false)
+    }
+    const createAddress = async () => {
+        toggle(true)
+        const res = await API.createAddress({
+            customerAccessToken: token as string,
+            address: {
+                address1,
+                address2,
+                city,
+                company,
+                firstName,
+                lastName,
+                phone,
+                province: stateCode,
+                zip,
+            },
+        })
+        const newID = res.res?.data?.customerAddressCreate?.customerAddress?.id
+        if (newID) {
+            pushBannerMessage({
+                title: 'Successfully created address',
+                autoClose: Constants.stdAutoCloseInterval,
+                styling: { backgroundColor: Colors.success },
+            })
+            close({ shouldRefresh: true, newDefaultID: shouldMarkDefault ? newID : undefined })
+        } else {
+            pushBannerMessage({
+                title: 'Error creating address, please retry',
+                autoClose: Constants.stdAutoCloseInterval,
+                styling: { backgroundColor: Colors.error },
+            })
+        }
+        toggle(false)
     }
 
     useEffect(() => {
@@ -98,9 +202,9 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, onDelete
 
     return (
         <>
-            <Drawer anchor={'bottom'} open={!!on} onClose={close}>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                    <IconButton onClick={close}>
+            <Drawer anchor={'bottom'} open={!!on} onClose={close} className={styles.popUp}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', }}>
+                    <IconButton onClick={() => close()}>
                         <CloseIcon />
                     </IconButton>
                 </div>
@@ -225,29 +329,17 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, onDelete
                     />
                     <FormGroup>
                         <FormControlLabel
-                            control={<Checkbox checked={isDefault} onClick={() => setIsDefault((b) => !b)} disabled={isDefaultAddress} />}
+                            control={
+                                <Checkbox
+                                    checked={shouldMarkDefault}
+                                    onClick={() => setShouldMarkDefault((b) => !b)}
+                                    disabled={isDefaultAddress}
+                                />
+                            }
                             label="Mark this address as default?"
                         />
                     </FormGroup>
-                    <Button
-                        variant="contained"
-                        style={{ marginTop: 10 }}
-                        onClick={() =>
-                            onUpdateAddress({
-                                address1,
-                                address2,
-                                city,
-                                company,
-                                firstName,
-                                id: editingAddress?.id,
-                                lastName,
-                                phone,
-                                province: stateCode,
-                                zip,
-                                markDefault: isDefault,
-                            })
-                        }
-                    >
+                    <Button variant="contained" style={{ marginTop: 10 }} onClick={editingAddress?.id ? updateAddress : createAddress}>
                         {!!editingAddress ? 'Update' : 'Create'}
                     </Button>
                     {!!editingAddress && (
@@ -261,7 +353,7 @@ export const AddressPopup = ({ editingAddress, isDefaultAddress, close, onDelete
                                 marginTop: 10,
                                 cursor: 'pointer',
                             }}
-                            onClick={() => onDeleteAddress(editingAddress?.id as string)}
+                            onClick={deleteAddress}
                         >
                             Delete this address
                         </Typography>

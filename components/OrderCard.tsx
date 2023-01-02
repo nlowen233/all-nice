@@ -21,7 +21,6 @@ export const OrderCard = ({ order, width }: Props) => {
                 borderTop: `1px solid ${Colors.lightest}`,
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
-                rowGap: 5,
             }}
         >
             <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.light }}>
@@ -33,7 +32,7 @@ export const OrderCard = ({ order, width }: Props) => {
                 </Typography>
             </Link>
             <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.light }}>
-                Date:
+                Date
             </Typography>
             <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.dark, justifySelf: 'right' }}>
                 {!!order.processedAt ? dayjs(order.processedAt).format(Constants.dateFmt) : ''}

@@ -228,7 +228,7 @@ const login = ({ email, password }: LoginParams) =>
     }
 `)
 
-export interface ShopifyAddress {
+export interface ShopifyAddress extends Record<string, any> {
     address1?: string
     address2?: string
     city?: string
@@ -248,26 +248,28 @@ export interface GetProfileParams {
 export interface GetProfileRes {
     errors?: { message?: string }[]
     data?: {
-        customer?: {
-            acceptsMarketing?: boolean | null
-            createdAt?: string | null
-            defaultAddress?: {
-                id?: string
-            }
-            email?: string | null
-            firstName?: string | null
-            lastName?: string | null
-            phone?: string | null
-            lastIncompleteCheckout?: {
-                id?: string | null
-            }
-            orders?: {
-                nodes: ShopifyOrder[]
-            }
-            addresses?: {
-                nodes: ShopifyAddress[]
-            }
-        }
+        customer?: ShopifyProfile
+    }
+}
+
+export interface ShopifyProfile {
+    acceptsMarketing?: boolean | null
+    createdAt?: string | null
+    defaultAddress?: {
+        id?: string
+    }
+    email?: string | null
+    firstName?: string | null
+    lastName?: string | null
+    phone?: string | null
+    lastIncompleteCheckout?: {
+        id?: string | null
+    }
+    orders?: {
+        nodes: ShopifyOrder[]
+    }
+    addresses?: {
+        nodes: ShopifyAddress[]
     }
 }
 
@@ -839,6 +841,7 @@ export interface CartLineItem {
         title?: string
     }
     title?: string
+    quantityAvailable?: number
 }
 
 const getCart = ({ id }: GetCartParams) =>
@@ -956,6 +959,79 @@ mutation {
 }
 `)
 
+export interface CreateCheckoutParams {
+    email: string
+    shippingAddress: ShopifyAddress
+    lineItems: { variantId: string; quantity: number }[]
+}
+
+export interface CreateCheckoutRes {
+    data?: {
+        checkoutCreate?: ShopifyCheckout
+        checkoutUserErrors?: ShopifyUserError[]
+    }
+    errors?: { message: string }[]
+}
+
+export interface ShopifyCheckout {
+    createdAt?: string
+    id?: string
+    totalPrice?: ShopifyMoney
+    subtotalPrice?: ShopifyMoney
+    totalTax?: ShopifyMoney
+}
+
+const createCheckout = ({ email, lineItems, shippingAddress }: CreateCheckoutParams) =>
+    callShopify<CreateCheckoutRes>(`
+mutation{
+  checkoutCreate(input:{email:"${email}",shippingAddress:{${Utils.inject(shippingAddress)}},lineItems:[${lineItems
+        .map((item) => `{${Utils.inject(item)}}`)
+        .join(',')}]}){
+    {${QueryStrings.checkout}}
+  }
+}
+`)
+
+export interface GetProfileForCheckoutRes {
+    errors?: { message?: string }[]
+    data?: {
+        customer?: {
+            defaultAddress?: {
+                id?: string
+            }
+            email?: string | null
+            addresses?: {
+                nodes: ShopifyAddress[]
+            }
+        }
+    }
+}
+
+const getProfileForCheckout = ({ customerAccessToken }: GetProfileParams) =>
+    callShopify<GetProfileForCheckoutRes>(`
+{
+  customer(customerAccessToken:""){
+    email,
+    defaultAddress{
+      id
+    }
+    addresses(first:250){
+      nodes{
+        address1,
+        address2,
+      	city,
+        company,
+        firstName,
+        lastName,
+        id,
+        phone,
+        provinceCode,
+      }
+    }
+  }
+}
+`)
+
 export const API = {
     getFrontPage,
     getSingleProduct,
@@ -977,4 +1053,5 @@ export const API = {
     addCartLine,
     removeCartLine,
     updateCartLine,
+    createCheckout,
 }

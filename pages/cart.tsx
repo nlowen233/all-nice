@@ -1,4 +1,4 @@
-import React, { useContext,useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import Typography from '@mui/material/Typography'
 import Head from 'next/head'
 import { CardList } from '../components/CardList'
@@ -11,13 +11,15 @@ import styles from '../styles/components/OrderCard.module.css'
 import { LineItemCard } from '../components/LineItemCard'
 import Button from '@mui/material/Button'
 import { Utils } from '../utils/Utils'
+import { useRouter } from 'next/router'
 
 export default function Cart() {
-    const { cart,Cart } = useContext(CartContext)
+    const { cart, Cart } = useContext(CartContext)
+    const router = useRouter()
     const items = cart?.lines?.nodes || []
-    useEffect(()=>{
+    useEffect(() => {
         Cart.get()
-    },[])
+    }, [])
     return (
         <>
             <Head>
@@ -32,43 +34,47 @@ export default function Cart() {
                         Your cart
                     </Typography>
                     <Link href={'/'}>
-                        <Typography variant="h2" color="primary" fontSize={'1em'} style={{ color: Colors.light,paddingBottom:5 }} className={styles.link}>
+                        <Typography
+                            variant="h2"
+                            color="primary"
+                            fontSize={'1em'}
+                            style={{ color: Colors.light, paddingBottom: 5 }}
+                            className={styles.link}
+                        >
                             Continue shopping
                         </Typography>
                     </Link>
-                    <div style={{width:'100%',minHeight:500}}>
-                    <CardList
-                        cards={items.map((line) => (
-                            <LineItemCard item={line} key={line.id} />
-                        ))}
-                        loadState={'success'}
-                        pageLimit={4}
-                    />
+                    <div style={{ width: '100%', minHeight: 500 }}>
+                        <CardList
+                            cards={items.map((line) => (
+                                <LineItemCard item={line} key={line.id} />
+                            ))}
+                            loading
+                            pageLimit={4}
+                        />
                     </div>
-                    <div style={{width:'100%',display:'grid',gridTemplateColumns:'1fr 1fr',paddingBottom:5,paddingTop:10}}>
-                <Typography variant="h4" color="primary" fontSize={'1.4em'} style={{ color: Colors.light }}>
-                    Subtotal
-                </Typography>
-                <Typography variant="h4" color="primary" fontSize={'1.4em'} style={{ justifySelf: 'right' }}>
-                    {Utils.displayPrice(cart?.cost?.subtotalAmount?.amount)}
-                </Typography>
-                </div>
-                <Typography variant="h2" color="primary" fontSize={'1em'} style={{ color: Colors.light,paddingBottom:10 }}>
-                    Taxes and shipping calculated at checkout
-                </Typography>
-                <div style={{width:'100%',display:'flex',justifyContent:'center'}}>
-                    <Link href={'/checkout'}>
-                    <Button
-                    variant="contained"
-                    color="primary"
-                    sx={{ width: Constants.stdButtonSize,marginBottom:5 }}
-                >
-                    Checkout
-                </Button>
-                    </Link>
-               
-                </div>
-                
+                    <div style={{ width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', paddingBottom: 5, paddingTop: 10 }}>
+                        <Typography variant="h4" color="primary" fontSize={'1.4em'} style={{ color: Colors.light }}>
+                            Subtotal
+                        </Typography>
+                        <Typography variant="h4" color="primary" fontSize={'1.4em'} style={{ justifySelf: 'right' }}>
+                            {Utils.displayPrice(cart?.cost?.subtotalAmount?.amount)}
+                        </Typography>
+                    </div>
+                    <Typography variant="h2" color="primary" fontSize={'1em'} style={{ color: Colors.light, paddingBottom: 10 }}>
+                        Taxes and shipping calculated at checkout
+                    </Typography>
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            sx={{ width: Constants.stdButtonSize, marginBottom: 5 }}
+                            disabled={!items.length}
+                            onClick={() => router.push('/checkout')}
+                        >
+                            Checkout
+                        </Button>
+                    </div>
                 </div>
             </div>
         </>

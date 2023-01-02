@@ -19,7 +19,7 @@ type Props = {
     width?: number
 }
 
-const BOTTOM_MARGIN = 15
+const BOTTOM_MARGIN = 10
 
 export const AddressCard = ({ address, isDefault, onClickEdit, onToggleDefault, width }: Props) => {
     return (

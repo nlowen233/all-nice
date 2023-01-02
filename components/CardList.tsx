@@ -11,16 +11,16 @@ import { Colors } from '../utils/Colors'
 
 type Props = {
     cards: JSX.Element[]
-    loadState: LoadState
+    loading: boolean
     pageLimit?: number
     slidesPerView?: number
     emptyMessage?: string
 }
 
-export const CardList = ({ cards, loadState, pageLimit, slidesPerView, emptyMessage }: Props) => {
+export const CardList = ({ cards, loading, pageLimit, slidesPerView, emptyMessage }: Props) => {
     const pagnatedCards = pagniateCards(cards, pageLimit || 6)
     return (
-        <LoaderWrapper loadState={loadState} items={cards}>
+        <LoaderWrapper loading={loading} items={cards}>
             <Swiper
                 modules={[Pagination]}
                 slidesPerView={slidesPerView || 1}
@@ -28,24 +28,20 @@ export const CardList = ({ cards, loadState, pageLimit, slidesPerView, emptyMess
                     clickable: true,
                 }}
                 style={{
-                    paddingBottom:20
+                    paddingBottom: 20,
                 }}
                 grabCursor
             >
                 {pagnatedCards.length < 1 ? (
                     !!emptyMessage ? (
                         <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
-                           {emptyMessage}
+                            {emptyMessage}
                         </Typography>
                     ) : (
                         <></>
                     )
                 ) : (
-                    pagnatedCards.map((cards, i) => (
-                        <SwiperSlide style={{ overflow: 'visible' }}>
-                            {cards.map((card) => card)}
-                        </SwiperSlide>
-                    ))
+                    pagnatedCards.map((cards, i) => <SwiperSlide style={{ overflow: 'visible' }} key={cards.reduce((acc,cur)=>cur.key+acc,'')}>{cards.map((card) => card)}</SwiperSlide>)
                 )}
             </Swiper>
         </LoaderWrapper>

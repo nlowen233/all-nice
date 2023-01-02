@@ -8,12 +8,12 @@ type Props = {
     onChange: (n: number) => void
     disabled?: boolean
     max?: number
-    min?:number
+    min?: number
 }
 
-export const QuantityButton = ({ onChange, value,disabled,max,min }: Props) => {
-    const canDec = (value >= (min||2)) && !disabled
-    const canInc = (value <= (max||98)) && !disabled
+export const QuantityButton = ({ onChange, value, disabled, max, min }: Props) => {
+    const canDec = value >= (min || 2) && !disabled
+    const canInc = value <= (max || 98) && !disabled
     return (
         <div style={{ display: 'flex', border: `1px solid ${Colors.dark}`, borderRadius: 10, alignItems: 'center' }}>
             <div

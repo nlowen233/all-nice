@@ -1,22 +1,15 @@
-import _, { DebouncedFunc } from 'lodash'
-import React, { useEffect, useState, useCallback, useContext, useMemo } from 'react'
-import { AuthContext } from '../contexts/AuthContext'
-import { BannerMessage, MessageBannerContext } from '../contexts/MessageBannerContext'
+import React, { useEffect, useState} from 'react'
+import { BannerMessage} from '../contexts/MessageBannerContext'
 import { LoadState } from '../types/misc'
 import {
-    AddCartLineParams,
     API,
     CartRes,
-    CreateCartParams,
     CreateOrAddCartLineParams,
     RemoveCartLine,
-    ReomveCartLineParams,
     UpdateCartLine,
-    UpdateCartLineParams,
 } from '../utils/API'
 import { Colors } from '../utils/Colors'
 import { Constants } from '../utils/Constants'
-import { Utils } from '../utils/Utils'
 
 interface LoadStateNode {
     id: number
@@ -34,7 +27,7 @@ export interface UseCartSig {
         add: ({ params, silent }: CartHookReq<CreateOrAddCartLineParams>) => Promise<void>
         remove: ({ params, silent }: CartHookReq<RemoveCartLine>) => Promise<void>
         update: ({ params, silent }: CartHookReq<UpdateCartLine>) => Promise<void>
-        get: ()=>Promise<void>
+        get: () => Promise<void>
     }
     isCartUpdating: boolean
     cartDeletionID: string | undefined
@@ -171,7 +164,7 @@ export const useCart = ({ pushBannerMessage, token }: UseCartParams): UseCartSig
         add,
         remove,
         update,
-        get
+        get,
     }
     useEffect(() => {
         get()

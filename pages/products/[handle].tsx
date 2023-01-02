@@ -60,6 +60,7 @@ export default function Product({ res }: Props) {
         const colorVal = variant.selectedOptions?.find((o) => o.name === COLOR_KEY)?.value
         return sizeVal === selectedSize && colorVal === selectedColor
     })
+    const selectedVariantMaxQuantity = selectedVariant?.quantityAvailable || undefined
     const selectedVariantPrice = selectedVariant?.price?.amount || undefined
     const addItem = () => {
         const variantID = selectedVariant?.id
@@ -80,8 +81,8 @@ export default function Product({ res }: Props) {
     return (
         <>
             <Head>
-                <title>{`${product?.title|| 'Product'} - All Nice Clothing`}</title>
-                <meta name="description" content={product?.description||"Check out this (nice) product out of All Nice Clothing"} />
+                <title>{`${product?.title || 'Product'} - All Nice Clothing`}</title>
+                <meta name="description" content={product?.description || 'Check out this (nice) product out of All Nice Clothing'} />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
                 <link rel="icon" href="/favicon.ico" />
                 <link
@@ -128,7 +129,7 @@ export default function Product({ res }: Props) {
                         </Typography>
                         <OptionSwiper onClickOption={setSelectedColor} options={colors} selectedOption={selectedColor} />
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
-                            <QuantityButton onChange={(n) => setQuantity((q) => q + n)} value={quantity} />
+                            <QuantityButton onChange={(n) => setQuantity((q) => q + n)} value={quantity} max={selectedVariantMaxQuantity} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
                             <Button
@@ -142,7 +143,7 @@ export default function Product({ res }: Props) {
                                 Add to Cart
                             </Button>
                         </div>
-                        <div style={{paddingTop:10,paddingBottom:10}}>
+                        <div style={{ paddingTop: 10, paddingBottom: 10 }}>
                             <Typography variant="h5" fontSize={'1.2em'} style={{ color: Colors.dark, fontWeight: 'bold', marginTop: 10 }}>
                                 Product Description
                             </Typography>

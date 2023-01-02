@@ -10,34 +10,27 @@ import { Constants } from '../../utils/Constants'
 import { Colors } from '../../utils/Colors'
 import Typography from '@mui/material/Typography'
 import { OrderCard } from '../../components/OrderCard'
-import { LoadState } from '../../types/misc'
-import { Utils } from '../../utils/Utils'
 import Link from 'next/link'
-import styles from '../../styles/pages/Profile.module.css'
 import EditIcon from '@mui/icons-material/Edit'
 import IconButton from '@mui/material/IconButton'
 import { AddressCard } from '../../components/AddressCard'
 import AddIcon from '@mui/icons-material/Add'
 import { AddressPopup } from '../../components/AddressPopup'
-import { deepEqual } from 'assert'
-import { LoaderWrapper } from '../../components/LoaderWrapper'
 import { CardList } from '../../components/CardList'
+import { ProfileContext } from '../../contexts/ProfileContext'
 
 export default function You() {
+    const { refresh, profile, profileLoading } = useContext(ProfileContext)
     const { token, checkedLocalStorage, setAuth } = useContext(AuthContext)
     const { toggle } = useContext(LoadingOverlayContext)
     const { pushBannerMessage } = useContext(MessageBannerContext)
-    const [profile, setProfile] = useState<GetProfileRes>({})
     const [editingAddressID, setEditingAddressID] = useState<undefined | string>(undefined)
     const [addressPopUp, setAddressPopUp] = useState(false)
-    const [triggerRefresh, setTriggerRefresh] = useState(false)
     const router = useRouter()
     const [passedAuth, setPassedAuth] = useState<undefined | boolean>(undefined)
-    const [loadState, setLoadState] = useState<LoadState>('init')
-    const customer = profile.data?.customer
-    const orders = customer?.orders?.nodes || []
-    const addresses = customer?.addresses?.nodes || []
-    const defaultAddressID = customer?.defaultAddress?.id
+    const orders = profile?.orders?.nodes || []
+    const addresses = profile?.addresses?.nodes || []
+    const defaultAddressID = profile?.defaultAddress?.id
     const editingAddress = addresses.find((add) => add.id === editingAddressID)
     const sortedAddresses = [...addresses].sort((a, b) => {
         if (a.id === defaultAddressID) {
@@ -48,26 +41,7 @@ export default function You() {
         }
         return 0
     })
-    const deleteAddress = async (addressID: string) => {
-        toggle(true)
-        const res = await API.deleteAddress({ addressID, customerAccessToken: token as string })
-        if (res.res?.data?.customerAddressDelete?.deletedCustomerAddressId) {
-            pushBannerMessage({
-                title: 'Successfully deleted address',
-                autoClose: Constants.stdAutoCloseInterval,
-                styling: { backgroundColor: Colors.success },
-            })
-            setAddressPopUp(false)
-            setTriggerRefresh(true)
-        } else {
-            pushBannerMessage({
-                title: 'Error deleting address',
-                autoClose: Constants.stdAutoCloseInterval,
-                styling: { backgroundColor: Colors.error },
-            })
-        }
-        toggle(false)
-    }
+
     const markAddressAsDefault = async (addressID: string) => {
         const res = await API.changeDefaultAddress({ addressID, customerAccessToken: token as string })
         if (res.err || res.res?.errors?.length || res.res?.data?.customerDefaultAddressUpdate?.customerUserErrors?.length) {
@@ -82,131 +56,10 @@ export default function You() {
                 autoClose: Constants.shortAutoCloseInterval,
                 styling: { backgroundColor: Colors.success },
             })
-            setTriggerRefresh(true)
+            refresh()
         }
     }
-    const updateAddress = async ({
-        address1,
-        address2,
-        city,
-        company,
-        firstName,
-        id,
-        lastName,
-        markDefault,
-        phone,
-        province,
-        zip,
-    }: UpdateCreateAddressReq) => {
-        if (!id) {
-            return
-        }
-        toggle(true)
-        const res = await API.updateAddress({
-            addressID: id,
-            customerAccessToken: token as string,
-            address: {
-                address1,
-                address2,
-                city,
-                company,
-                firstName,
-                lastName,
-                phone,
-                province,
-                zip,
-            },
-        })
-        if (res.res?.data?.customerAddressUpdate?.customerUserErrors?.length || res.err || res.res?.errors?.length) {
-            pushBannerMessage({
-                title: 'Error updating address, please retry',
-                autoClose: Constants.stdAutoCloseInterval,
-                styling: { backgroundColor: Colors.error },
-            })
-        } else {
-            pushBannerMessage({
-                title: 'Successfully updated address',
-                autoClose: Constants.stdAutoCloseInterval,
-                styling: { backgroundColor: Colors.success },
-            })
-            setAddressPopUp(false)
-            if (markDefault && id !== defaultAddressID) {
-                markAddressAsDefault(id)
-            } else {
-                setTriggerRefresh(true)
-            }
-        }
-        toggle(false)
-    }
-    const createAddress = async ({
-        address1,
-        address2,
-        city,
-        company,
-        firstName,
-        id,
-        lastName,
-        markDefault,
-        phone,
-        province,
-        zip,
-    }: UpdateCreateAddressReq) => {
-        toggle(true)
-        const res = await API.createAddress({
-            customerAccessToken: token as string,
-            address: {
-                address1,
-                address2,
-                city,
-                company,
-                firstName,
-                lastName,
-                phone,
-                province,
-                zip,
-            },
-        })
-        const newID = res.res?.data?.customerAddressCreate?.customerAddress?.id
-        if (newID) {
-            pushBannerMessage({
-                title: 'Successfully created address',
-                autoClose: Constants.stdAutoCloseInterval,
-                styling: { backgroundColor: Colors.success },
-            })
-            setAddressPopUp(false)
-            if (markDefault && id !== defaultAddressID) {
-                markAddressAsDefault(newID)
-            } else {
-                setTriggerRefresh(true)
-            }
-        } else {
-            pushBannerMessage({
-                title: 'Error creating address, please retry',
-                autoClose: Constants.stdAutoCloseInterval,
-                styling: { backgroundColor: Colors.error },
-            })
-        }
-        toggle(false)
-    }
-    const getProfile = (noOverlay?: boolean) => {
-        setLoadState('loading')
-        !noOverlay && toggle(true)
-        API.getProfile({ customerAccessToken: token as string }).then((res) => {
-            const shopifyErrors = res.res?.errors || []
-            if (res.err || !!shopifyErrors?.length) {
-                pushBannerMessage({
-                    title: res.message || shopifyErrors[0].message || 'Unknown error occured while loading profile data',
-                    autoClose: Constants.stdAutoCloseInterval,
-                    styling: { backgroundColor: Colors.error },
-                })
-                setLoadState('failure')
-            } else {
-                setProfile(res.res || {})
-                setLoadState('success')
-            }
-            !noOverlay && toggle(false)
-        })
-    }
+
     useEffect(() => {
         if (!checkedLocalStorage) {
             return
@@ -220,18 +73,9 @@ export default function You() {
 
     useMountlessEffect(() => {
         if (passedAuth) {
-            getProfile()
+            refresh()
         }
     }, [passedAuth])
-
-    useMountlessEffect(() => {
-        if (!triggerRefresh) {
-            return
-        } else {
-            getProfile(true)
-            setTriggerRefresh(false)
-        }
-    }, [triggerRefresh])
 
     return (
         <>
@@ -268,7 +112,7 @@ export default function You() {
                         cards={orders.map((order) => (
                             <OrderCard order={order} key={order.orderNumber} />
                         ))}
-                        loadState={loadState}
+                        loading={profileLoading}
                         emptyMessage={'You have no orders'}
                     />
                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -283,13 +127,13 @@ export default function You() {
                     </div>
                     <div style={{ paddingLeft: 10 }}>
                         <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light }}>
-                            {profile.data?.customer?.firstName} {profile.data?.customer?.lastName}
+                            {profile?.firstName} {profile?.lastName}
                         </Typography>
                         <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light }}>
-                            {profile.data?.customer?.email}
+                            {profile?.email}
                         </Typography>
                         <Typography variant="subtitle1" fontSize={'1em'} style={{ color: Colors.light }}>
-                            {profile.data?.customer?.phone}
+                            {profile?.phone}
                         </Typography>
                     </div>
                     <div style={{ paddingTop: 20 }} />
@@ -310,37 +154,37 @@ export default function You() {
                             <AddIcon />
                         </IconButton>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column', minHeight: 200 }}>
-                        <LoaderWrapper loadState={loadState} items={addresses}>
-                            {!!orders.length ? (
-                                sortedAddresses.map((add) => (
-                                    <AddressCard
-                                        width={280}
-                                        address={add}
-                                        key={add.id}
-                                        isDefault={add.id === defaultAddressID}
-                                        onClickEdit={() => {
-                                            setEditingAddressID(add.id)
-                                            setAddressPopUp(true)
-                                        }}
-                                        onToggleDefault={() => add.id && defaultAddressID !== add.id && markAddressAsDefault(add.id)}
-                                    />
-                                ))
-                            ) : (
-                                <Typography variant="h5" fontSize={'1em'} style={{ color: Colors.dark, fontWeight: 'bold' }}>
-                                    You don't have any known addresses
-                                </Typography>
-                            )}
-                        </LoaderWrapper>
-                    </div>
+                    <CardList
+                        cards={sortedAddresses.map((add) => (
+                            <AddressCard
+                                width={280}
+                                address={add}
+                                key={add.id}
+                                isDefault={add.id === defaultAddressID}
+                                onClickEdit={() => {
+                                    setEditingAddressID(add.id)
+                                    setAddressPopUp(true)
+                                }}
+                                onToggleDefault={() => add.id && defaultAddressID !== add.id && markAddressAsDefault(add.id)}
+                            />
+                        ))}
+                        loading={profileLoading}
+                        emptyMessage="You have no known addresses"
+                        pageLimit={4}
+                    />
                 </div>
             </div>
             <AddressPopup
                 editingAddress={editingAddress}
                 isDefaultAddress={defaultAddressID === editingAddressID}
-                close={() => setAddressPopUp(false)}
-                onDeleteAddress={deleteAddress}
-                onUpdateAddress={editingAddressID ? updateAddress : createAddress}
+                close={(e) => {
+                    setAddressPopUp(false)
+                    if (e?.shouldRefresh) {
+                        refresh()
+                    } else if (e?.newDefaultID) {
+                        markAddressAsDefault(e.newDefaultID)
+                    }
+                }}
                 on={addressPopUp}
             />
         </>

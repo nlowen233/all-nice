@@ -35,6 +35,7 @@ export const QueryStrings = {
             ... on ProductVariant {
               id,
               title,
+              quantityAvailable,
               product {
                 featuredImage {
                   url
@@ -46,5 +47,25 @@ export const QueryStrings = {
           }
         }
       }
+    `,
+    checkout: `
+    checkout{
+      createdAt,
+      id,
+      totalPrice{
+        amount
+      },
+      subtotalPrice{
+        amount
+      },
+      totalTax{
+        amount
+      }
+    },
+    checkoutUserErrors{
+      code,
+      field,
+      message
+    }
     `,
 }

@@ -81,15 +81,16 @@ export const LineItemCard = ({ item, width }: Props) => {
                         setMutateQuantity(true)
                     }}
                     disabled={imBeingDeleted}
+                    max={item?.merchandise?.quantityAvailable || undefined}
                 />
-                <div style={{width:30,height:30,display:'flex',justifyContent:'center',alignItems:'center'}}>
-                {imBeingDeleted ? (
-                    <CircularProgress size={20}/>
-                ) : (
-                    <IconButton onClick={() => Cart.remove({ params: { id: item?.id as string } })} disabled={!item?.id}>
-                        <DeleteForeverIcon />
-                    </IconButton>
-                )}
+                <div style={{ width: 30, height: 30, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    {imBeingDeleted ? (
+                        <CircularProgress size={20} />
+                    ) : (
+                        <IconButton onClick={() => Cart.remove({ params: { id: item?.id as string } })} disabled={!item?.id}>
+                            <DeleteForeverIcon />
+                        </IconButton>
+                    )}
                 </div>
             </div>
         </div>
