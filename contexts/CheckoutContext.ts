@@ -3,6 +3,6 @@ import { UseCheckoutSig } from '../hooks/useCheckout'
 
 export const CheckoutContext = React.createContext<UseCheckoutSig>({
    checkout: undefined, 
-   createCheckout:()=>{},
+   createCheckout:async ()=>{},
    creatingCheckout: false
 })
